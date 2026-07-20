@@ -1,0 +1,12 @@
+{
+  "name": "tantaihaha4487-skills",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Minecraft engineering skills for PaperMC plugins and Fabric mods",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tantaihaha4487/skills"
+  },
+  "license": "MIT"
+}
+

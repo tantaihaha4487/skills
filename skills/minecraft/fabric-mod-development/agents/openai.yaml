@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fabric Mod Development"
+  short_description: "Build and maintain version-correct Fabric mods"
+  default_prompt: "Use $fabric-mod-development to analyze this Fabric project before implementing and validating the requested change."

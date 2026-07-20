@@ -1,0 +1,4 @@
+interface:
+  display_name: "PaperMC Plugin Development"
+  short_description: "Build and maintain safe Paper plugins"
+  default_prompt: "Use $papermc-plugin-development to analyze this Paper plugin repository, implement the requested change, and validate it."
