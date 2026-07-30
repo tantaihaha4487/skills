@@ -1,0 +1,4 @@
+interface:
+  display_name: "Iris Shader Development"
+  short_description: "Build and debug Iris/Sodium shader packs"
+  default_prompt: "Use $iris-shader-development to analyze, implement, debug, optimize, and validate this Minecraft Iris shader-pack task."
