@@ -17,6 +17,17 @@ Develop shader packs as version-aware GPU software, not as isolated GLSL snippet
 6. **Validate in risk order**: shader load/compile, patched source, terrain/cutout/entities/water/particles/weather/hand, day/night/rain/Nether/End, resize/reload, then performance. Do not claim runtime support from syntax inspection alone.
 7. **Package** only after testing. The ZIP root must contain the pack directory with `shaders/` at the expected level; include license and concise usage notes when distributing.
 
+## Buffer-format rule
+
+Iris buffer formats such as `RGBA16F`, `RGBA8`, `R11F_G11F_B10F`, and `RGB16F` are **properties directives**, not GLSL identifiers. Declare them in `shaders/shaders.properties`, for example:
+
+```properties
+colortex0Format=RGBA16F
+colortex1Format=RGBA8
+```
+
+Never write `const int colortex0Format = RGBA16F;` (or equivalent) in a `.glsl`, `.fsh`, or `.vsh` file: the GLSL compiler will report the format token as an undefined variable. Before packaging, search all shader source for `const int *Format` assignments and confirm every `colortexNFormat` directive is in `shaders.properties`.
+
 ## Pass selection
 
 - **gbuffers**: actual Minecraft geometry; start with the specific program and rely on documented fallbacks.

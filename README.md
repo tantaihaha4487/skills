@@ -21,6 +21,7 @@ Install a single skill by name:
 ```bash
 npx skills@latest add tantaihaha4487/skills --skill papermc-plugin-development
 npx skills@latest add tantaihaha4487/skills --skill fabric-mod-development
+npx skills@latest add tantaihaha4487/skills --skill iris-shader-development
 ```
 
 Use `--global` with `--agent codex` to install them in your user-level Codex skills directory.
@@ -38,6 +39,12 @@ It covers lifecycle and thread ownership, commands, events, entities, inventorie
 [`fabric-mod-development`](skills/minecraft/fabric-mod-development/SKILL.md) helps analyze, implement, debug, test, and migrate Fabric Minecraft mods while preserving exact Minecraft, mappings, Loader, Loom, and Fabric API compatibility.
 
 It covers registries, events, mixins, networking, persistence, data generation, client rendering, configuration, tests, builds, releases, and Minecraft version ports.
+
+### Iris Shader Development
+
+[`iris-shader-development`](skills/minecraft/iris-shader-development/SKILL.md) covers version-aware Minecraft shader-pack development for Iris with Sodium, including gbuffers, shadows, deferred/composite/final passes, shader properties, buffer formats, compatibility debugging, performance, and packaging.
+
+Important compatibility rule: Iris buffer formats such as `RGBA16F` and `RGBA8` belong in `shaders/shaders.properties`, for example `colortex0Format=RGBA16F`. They must not be used as GLSL identifiers such as `const int colortex0Format = RGBA16F;`, or the shader compiler will report an undefined-variable error.
 
 ## Engineering workflow
 
