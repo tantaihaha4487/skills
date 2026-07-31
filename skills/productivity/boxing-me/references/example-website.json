@@ -1,0 +1,99 @@
+{
+  "id": "website-direction-v1",
+  "title": "Shape the website before we build",
+  "context": "Choose the few decisions that change the design and implementation. The agent will use your saved answers as the working brief.",
+  "questions": [
+    {
+      "id": "visual-tone",
+      "prompt": "What should the site feel like?",
+      "why": "This drives typography, color, spacing, imagery, and motion.",
+      "type": "single",
+      "required": true,
+      "allow_other": true,
+      "options": [
+        {
+          "id": "quiet-editorial",
+          "label": "Quiet editorial",
+          "details": "Strong typography, generous whitespace, restrained color, and subtle motion.",
+          "recommended": true,
+          "recommendation_reason": "It creates a durable visual system and keeps the content—not decoration—as the focus."
+        },
+        {
+          "id": "bold-playful",
+          "label": "Bold and playful",
+          "details": "Saturated color, expressive type, larger shapes, and more visible animation."
+        },
+        {
+          "id": "technical-minimal",
+          "label": "Technical minimal",
+          "details": "Dense grids, mono accents, compact spacing, and almost no decorative motion."
+        }
+      ]
+    },
+    {
+      "id": "content-priority",
+      "prompt": "What must visitors understand first?",
+      "why": "The first-screen message determines the page hierarchy and primary call to action.",
+      "type": "single",
+      "required": true,
+      "options": [
+        {
+          "id": "outcome",
+          "label": "The outcome I deliver",
+          "details": "Lead with the visitor's result, then support it with proof and process.",
+          "recommended": true,
+          "recommendation_reason": "Outcome-first messaging is clearest for new visitors who do not yet know you."
+        },
+        {
+          "id": "work",
+          "label": "My best work",
+          "details": "Lead with a visual project gallery and let examples establish credibility."
+        },
+        {
+          "id": "story",
+          "label": "My personal story",
+          "details": "Lead with identity and background; useful when personality is the main differentiator."
+        }
+      ]
+    },
+    {
+      "id": "launch-scope",
+      "prompt": "What belongs in the first release?",
+      "why": "A smaller launch is faster to polish; extra sections increase writing and testing work.",
+      "type": "multi",
+      "required": true,
+      "min": 2,
+      "max": 4,
+      "allow_other": true,
+      "options": [
+        {
+          "id": "home",
+          "label": "Home",
+          "details": "Core proposition, proof, and primary call to action.",
+          "recommended": true,
+          "recommendation_reason": "Every usable first release needs a clear entry point."
+        },
+        {
+          "id": "projects",
+          "label": "Projects",
+          "details": "Selected case studies with outcomes and your contribution."
+        },
+        {
+          "id": "about",
+          "label": "About",
+          "details": "Background, working style, and a portrait or personal visual."
+        },
+        {
+          "id": "writing",
+          "label": "Writing",
+          "details": "Articles or notes; valuable only if content is ready to maintain."
+        },
+        {
+          "id": "contact",
+          "label": "Contact",
+          "details": "A focused conversion path with email, form, or booking link."
+        }
+      ]
+    }
+  ]
+}

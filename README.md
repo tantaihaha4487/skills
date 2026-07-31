@@ -1,6 +1,6 @@
-# Minecraft Engineering Skills
+# Agent Skills
 
-Reusable agent skills for real PaperMC plugin and Fabric mod engineering. They are designed to be small, composable, and grounded in the target repository's actual APIs, versions, and conventions.
+Reusable agent skills for practical engineering and collaboration. They are designed to be small, composable, and grounded in the target task's actual constraints.
 
 ## Quickstart
 
@@ -10,7 +10,7 @@ Install the skills into your project with the [skills.sh](https://skills.sh/) in
 npx skills@latest add tantaihaha4487/skills
 ```
 
-Select the skills and coding agents you want during installation. To install both skills for Codex automatically:
+Select the skills and coding agents you want during installation. To install all skills for Codex automatically:
 
 ```bash
 npx skills@latest add tantaihaha4487/skills --agent codex --skill '*' --yes
@@ -22,11 +22,16 @@ Install a single skill by name:
 npx skills@latest add tantaihaha4487/skills --skill papermc-plugin-development
 npx skills@latest add tantaihaha4487/skills --skill fabric-mod-development
 npx skills@latest add tantaihaha4487/skills --skill iris-shader-development
+npx skills@latest add tantaihaha4487/skills --skill boxing-me
 ```
 
 Use `--global` with `--agent codex` to install them in your user-level Codex skills directory.
 
 ## Included skills
+
+### Box My Decisions
+
+[`boxing-me`](skills/productivity/boxing-me/SKILL.md) replaces a long clarification interview with one interactive decision page. It presents checkboxes or single-choice cards, detailed tradeoffs, clearly explained recommendations, visual review, autosave, and a response file the agent can use to continue.
 
 ### PaperMC Plugin Development
 
@@ -48,7 +53,7 @@ Important compatibility rule: Iris buffer formats such as `RGBA16F` and `RGBA8` 
 
 ## Engineering workflow
 
-Both skills follow an evidence-first workflow:
+The engineering skills follow an evidence-first workflow:
 
 1. Understand the repository and its instructions.
 2. Analyze the existing architecture and resolved dependencies.
