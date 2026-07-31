@@ -7,6 +7,7 @@ Use UTF-8 JSON. Unknown fields are ignored so specifications remain forward-comp
 ```json
 {
   "id": "unique-draft-id",
+  "locale": "en",
   "title": "Choose the direction",
   "context": "A short description of what the agent will do after this review.",
   "questions": [
@@ -39,6 +40,7 @@ Use UTF-8 JSON. Unknown fields are ignored so specifications remain forward-comp
 ## Fields
 
 - Root `id`: stable identifier for this draft. Change it when revised questions invalidate old answers.
+- Root `locale`: optional built-in interface language, `en` or `th`; defaults to `en`.
 - Root `title`: short action-oriented heading.
 - Root `context`: what is being decided and what happens next.
 - `questions`: one or more question objects with unique IDs.

@@ -57,6 +57,15 @@ class DecisionPageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "duplicated"):
             decision_page.validate_spec(spec)
 
+    def test_thai_interface_and_unknown_locale(self):
+        spec = {**SPEC, "locale": "th"}
+        page = decision_page.render_html(spec)
+        self.assertIn('<html lang="th">', page)
+        self.assertIn("ใช้ตัวเลือกที่แนะนำ", page)
+        self.assertIn("บันทึกคำตอบ", page)
+        with self.assertRaisesRegex(ValueError, "locale"):
+            decision_page.validate_spec({**SPEC, "locale": "jp"})
+
     def test_server_serves_and_saves_matching_response(self):
         with tempfile.TemporaryDirectory() as directory:
             response_path = Path(directory) / "response.json"
