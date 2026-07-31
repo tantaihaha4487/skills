@@ -36,6 +36,7 @@ Replace a long question-by-question interview with one decision page. Ask only d
 - Do not preselect recommendations. The user must actively choose, or use **Apply recommendations**.
 - Make required state, selection state, recommendation, rationale, and validation visible without relying on color alone.
 - Include a final review, overall notes, autosave in the browser, copy, JSON download, and server save.
+- Use `Noto Sans` with `Noto Sans Thai` fallback as the default local-first font stack; do not add a network font dependency.
 - Bind the server to `127.0.0.1` unless the user explicitly requests network sharing. Never place secrets in the page.
 - Use a new response filename for a materially revised draft so stale answers cannot be mistaken for current approval.
 

@@ -40,6 +40,7 @@ class DecisionPageTests(unittest.TestCase):
         self.assertNotIn("</script><script>alert(1)</script>", page)
         self.assertIn("\\u003c/script>", page)
         self.assertIn("Apply recommendations", page)
+        self.assertIn('font:16px/1.55 "Noto Sans","Noto Sans Thai"', page)
 
         node = shutil.which("node")
         if node:
