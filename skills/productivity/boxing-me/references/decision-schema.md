@@ -1,68 +1,60 @@
 # Decision specification
 
-Use UTF-8 JSON. Unknown fields are ignored so specifications remain forward-compatible.
+Use UTF-8 JSON. Prefer the compact authoring shape; the legacy verbose shape remains accepted. Both normalize to the same page model.
 
-## Shape
+## Compact shape
 
 ```json
 {
-  "id": "unique-draft-id",
-  "locale": "en",
-  "title": "Choose the direction",
-  "context": "A short description of what the agent will do after this review.",
-  "questions": [
-    {
-      "id": "layout",
-      "prompt": "Which layout should we use?",
-      "why": "This changes navigation and implementation effort.",
-      "type": "single",
-      "required": true,
-      "options": [
-        {
-          "id": "focused",
-          "label": "Focused single page",
-          "details": "One continuous page with anchored sections.",
-          "recommended": true,
-          "recommendation_reason": "It is the fastest stable fit for the current amount of content."
-        },
-        {
-          "id": "multi",
-          "label": "Multiple pages",
-          "details": "Separate routes for each major topic. Better separation, more navigation work."
-        }
-      ],
-      "allow_other": true
-    }
-  ]
+  "i": "draft-id",
+  "l": "en",
+  "t": "Choose the direction",
+  "c": "What happens after this review.",
+  "q": [{
+    "i": "layout", "p": "Which layout?", "w": "This changes navigation.",
+    "t": "s", "r": true, "a": true,
+    "o": [
+      ["focused", "Focused page", "One route with anchored sections.", "Fastest stable fit."],
+      ["multi", "Multiple pages", "Clear separation with more navigation work."]
+    ]
+  }]
 }
 ```
 
-## Fields
+Root keys: `i` ID, `l` locale (`en` or `th`, default `en`), `t` title, `c` context, and `q` questions.
 
-- Root `id`: stable identifier for this draft. Change it when revised questions invalidate old answers.
-- Root `locale`: optional built-in interface language, `en` or `th`; defaults to `en`.
-- Root `title`: short action-oriented heading.
-- Root `context`: what is being decided and what happens next.
-- `questions`: one or more question objects with unique IDs.
-- Question `prompt`: direct question.
-- Question `why`: concise consequence of the decision.
-- Question `type`: `single`, `multi`, or `text`.
-- Question `required`: boolean, default `false`.
-- Question `options`: required for `single` and `multi`; use at least two options with unique IDs.
-- Question `allow_other`: add a free-text alternative to a choice question.
-- Question `min` / `max`: optional selected-count bounds for `multi`.
-- Option `label`: concise choice name.
-- Option `details`: behavior, cost, and tradeoffs; do not repeat the label.
-- Option `recommended`: boolean. Use at most one per question.
-- Option `recommendation_reason`: required on a recommended option; explain why it fits this task.
+Question keys:
 
-The page always adds overall notes and an answer review. A saved response records the spec ID, timestamp, selected option IDs and labels, other text, per-question notes, and overall notes.
+- `i`, `p`, `w`: unique ID, prompt, and consequence.
+- `t`: `s` single, `m` multi, or `x` text.
+- `r`: required boolean; `a`: allow-other boolean.
+- `n` / `m`: minimum/maximum count for multi-choice.
+- `o`: option tuples `[id, label, details]`. A fourth string marks that option recommended and gives its reason. Use at most one.
+- `if`: optional visibility expression.
+
+## Conditional branches
+
+- `['question-id', 'option-id']`: show when that earlier choice is selected.
+- `['all', condition, condition]`: require every child.
+- `['any', condition, condition]`: require at least one child.
+- `['not', condition]`: invert one child.
+
+Reference only an earlier single- or multi-choice question and one of its option IDs. This ordering prevents cycles. A branch whose dependency is itself hidden remains hidden. Hidden answers stay in browser autosave but are excluded from validation, progress, review, recommendations, copied briefs, and saved responses.
+
+## Legacy verbose fields
+
+The existing `id`, `locale`, `title`, `context`, and `questions` root fields remain valid. Questions may use `id`, `prompt`, `why`, `type`, `required`, `allow_other`, `min`, `max`, `options`, and `when`. Options may use `id`, `label`, `details`, `recommended`, and `recommendation_reason`. Use the same condition arrays for `when`.
+
+Unknown verbose fields are ignored. Choice questions require at least two uniquely identified options. Recommended options require a reason. Multi-choice bounds must be non-negative, ordered, and no larger than the option count.
+
+## Saved response
+
+The response keeps `boxing-me-response-v1`, `spec_id`, `spec_title`, `saved_at`, `answers`, and `overall_notes`. Each active answer includes its question, selected IDs and labels, written/other input, notes, and `source` (`agent` or `user`). `custom_questions` stores definitions created through **Add question**. Inactive questions are omitted.
 
 ## Writing checks
 
-- Avoid duplicate choices disguised by wording.
-- Avoid leading language outside the explicitly labeled recommendation.
-- Do not use a recommendation when evidence is insufficient or preference is entirely subjective.
-- Say when a choice is reversible or expensive to change later.
-- Put technical detail in `details`; keep `label` and `prompt` accessible.
-- Never request passwords, API keys, private tokens, or similarly sensitive input.
+- Cover material edge cases, dependencies, failure states, and costly-to-reverse choices.
+- Keep labels short; put behavior, cost, risk, and tradeoffs in details.
+- Avoid duplicate or leading choices outside the explicit recommendation.
+- Omit a recommendation when evidence is insufficient or preference is subjective.
+- Never request passwords, keys, tokens, or similarly sensitive input.

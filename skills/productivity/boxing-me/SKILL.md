@@ -1,63 +1,51 @@
 ---
 name: boxing-me
-description: Consolidate a large or repetitive set of clarification questions into one polished, interactive HTML decision page with checkboxes, radio choices, recommendations, explanations, free-form feedback, review, and a saved response for the agent to consume. Use when a user says "grill me", asks for a questionnaire or decision brief, wants to review a draft visually, is frustrated by many back-and-forth questions, or when three or more material choices would otherwise block or significantly change the work.
+description: Turn a complex clarification interview into one interactive HTML decision page with recommendations, conditional branches, custom questions, review, and saved responses. Use when the user says "grill me," requests a questionnaire or visual decision brief, wants exhaustive edge-case review, or when three or more material choices block the work.
 ---
 
 # Box My Decisions
 
-Replace a long question-by-question interview with one decision page. Ask only decisions that materially change scope, behavior, cost, risk, or presentation; continue independently on everything else.
+Resolve a decision tree in one page while spending agent tokens on the brief, not HTML.
 
 ## Workflow
 
-1. Inspect the task and available artifacts before asking anything. Resolve discoverable facts yourself.
-2. Draft a JSON specification following [the decision schema](references/decision-schema.md). Group related choices, use plain language, and keep the page short enough to scan.
-3. For each question:
-   - explain why the decision matters;
-   - provide concrete, mutually distinct choices;
-   - mark exactly one recommendation when a sensible default exists;
-   - explain the recommendation and each option's meaningful tradeoff;
-   - include `other` or a free-text question when fixed choices cannot cover legitimate answers.
-4. Generate and serve the page:
+1. Inspect the task, codebase, and available artifacts. Answer discoverable questions yourself.
+2. Map decisions and dependencies. Probe scope boundaries, empty/error states, reversibility, compatibility, accessibility, security, and rollout where relevant. Do not manufacture irrelevant questions.
+3. Draft the compact JSON format in [the decision schema](references/decision-schema.md). Keep full user-facing detail in prompts, consequences, option tradeoffs, and recommendation reasons.
+4. For every applicable question:
+   - provide distinct choices and a recommended answer when evidence supports one;
+   - explain why the decision matters and why the recommendation fits;
+   - use a conditional branch when a question applies only after an earlier choice;
+   - allow another answer or written input when fixed choices are incomplete.
+5. Validate, build, and serve:
 
    ```bash
+   python3 <skill-dir>/scripts/decision_page.py validate <spec.json>
+   python3 <skill-dir>/scripts/decision_page.py build <spec.json> --output <decision-page.html>
    python3 <skill-dir>/scripts/decision_page.py serve <spec.json> \
-     --output <decision-page.html> \
-     --response <response.json>
+     --output <decision-page.html> --response <response.json>
    ```
 
-5. Read the printed `BOXING_ME_URL`, give it to the user as a clickable link, identify the response path, and ask them to click **Save decisions** and tell you when done. Keep the server process running.
-6. After the user confirms, read the response JSON. Respect `selected`, `other`, and `notes`; do not reopen settled choices. If required answers are absent, ask only for those missing answers.
-7. Summarize the chosen direction and continue the original task. Treat recommendations as suggestions, never as consent.
+6. Give the printed `BOXING_ME_URL` as a clickable link, name the response path, and ask the user to save and confirm. Keep the server running.
+7. Read the response, including custom questions. Respect settled answers and omit inactive branches. Ask again only when an answer exposes a genuinely new material decision or a required active answer is missing.
+8. Summarize the shared direction and continue the original task. Treat recommendations as suggestions, never consent.
 
-## Page design rules
+## Page rules
 
-- Prefer 3-7 grouped questions. Split only when the decisions truly cannot fit coherently.
-- Use `single` for one-of-many, `multi` only when choices may coexist, and `text` for irreducible open input.
-- Do not preselect recommendations. The user must actively choose, or use **Apply recommendations**.
-- Make required state, selection state, recommendation, rationale, and validation visible without relying on color alone.
-- Include a final review, overall notes, autosave in the browser, copy, JSON download, and server save.
-- Use `Noto Sans` with `Noto Sans Thai` fallback as the default local-first font stack; do not add a network font dependency.
-- Bind the server to `127.0.0.1` unless the user explicitly requests network sharing. Never place secrets in the page.
-- Use a new response filename for a materially revised draft so stale answers cannot be mistaken for current approval.
-
-## Decision threshold
-
-Do not invoke the page for one or two simple questions. Use it when there are at least three material decisions, the user explicitly asks for this workflow, or a visual review will substantially reduce ambiguity. If a safe default permits progress, state the assumption and proceed rather than manufacturing a question.
+- Prefer 3-7 visible grouped questions; encode dependent questions instead of showing irrelevant branches.
+- Use `single` for one choice, `multi` for compatible choices, and `text` only for irreducible input.
+- Do not preselect recommendations. Let the user choose or apply them explicitly.
+- Make required, selected, recommended, invalid, and hidden state understandable without color alone.
+- Preserve browser autosave, review, notes, copy, download, server save, and the full custom-question builder.
+- Use local `Noto Sans` with `Noto Sans Thai` fallback. Keep ordinary copy at weight 200 and emphasis visibly heavier.
+- Bind to `127.0.0.1` unless network sharing is requested. Never put secrets in a page.
+- Change the spec ID when revisions make saved answers stale.
 
 ## Failure handling
 
-- If the server cannot start, run the `build` command and provide the HTML file link. The user can copy the agent brief or download JSON.
-- If the user closes or refreshes the page, restore answers from browser autosave.
-- If the response file is missing after confirmation, ask the user to reopen the same URL and click **Save decisions**, or paste the copied agent brief.
-- If a choice becomes invalid after new evidence, explain the evidence and request review only for the affected decision.
+- If serving fails, provide the built HTML; copy or download still works.
+- If the response file is missing, ask the user to save again or paste the copied brief.
+- Preserve hidden-branch drafts locally but never treat them as active approval.
+- If new evidence invalidates a choice, explain it and reopen only the affected branch.
 
-## Verification
-
-Before presenting the page, run:
-
-```bash
-python3 <skill-dir>/scripts/decision_page.py validate <spec.json>
-python3 <skill-dir>/scripts/decision_page.py build <spec.json> --output <decision-page.html>
-```
-
-Confirm that generation succeeds, no external assets are required, and the served save endpoint writes parseable JSON. Report only checks actually performed.
+Report only checks actually performed. Before presenting a page, confirm validation, generation, script syntax, no external assets, and a parseable server-saved response.

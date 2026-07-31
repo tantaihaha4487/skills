@@ -1,98 +1,39 @@
 {
-  "id": "website-direction-v1",
-  "title": "Shape the website before we build",
-  "context": "Choose the few decisions that change the design and implementation. The agent will use your saved answers as the working brief.",
-  "questions": [
+  "i": "website-direction-v2", "t": "Shape the website before we build",
+  "c": "Choose the decisions that change the design and implementation. The agent will use your saved answers as the working brief.",
+  "q": [
     {
-      "id": "visual-tone",
-      "prompt": "What should the site feel like?",
-      "why": "This drives typography, color, spacing, imagery, and motion.",
-      "type": "single",
-      "required": true,
-      "allow_other": true,
-      "options": [
-        {
-          "id": "quiet-editorial",
-          "label": "Quiet editorial",
-          "details": "Strong typography, generous whitespace, restrained color, and subtle motion.",
-          "recommended": true,
-          "recommendation_reason": "It creates a durable visual system and keeps the content—not decoration—as the focus."
-        },
-        {
-          "id": "bold-playful",
-          "label": "Bold and playful",
-          "details": "Saturated color, expressive type, larger shapes, and more visible animation."
-        },
-        {
-          "id": "technical-minimal",
-          "label": "Technical minimal",
-          "details": "Dense grids, mono accents, compact spacing, and almost no decorative motion."
-        }
+      "i": "visual-tone", "p": "What should the site feel like?", "w": "This drives typography, color, spacing, imagery, and motion.", "t": "s", "r": true, "a": true,
+      "o": [
+    ["quiet-editorial", "Quiet editorial", "Strong typography, generous whitespace, restrained color, and subtle motion.", "It creates a durable visual system and keeps the content—not decoration—as the focus."],
+    ["bold-playful", "Bold and playful", "Saturated color, expressive type, larger shapes, and more visible animation."],
+    ["technical-minimal", "Technical minimal", "Dense grids, mono accents, compact spacing, and almost no decorative motion."]
       ]
     },
     {
-      "id": "content-priority",
-      "prompt": "What must visitors understand first?",
-      "why": "The first-screen message determines the page hierarchy and primary call to action.",
-      "type": "single",
-      "required": true,
-      "options": [
-        {
-          "id": "outcome",
-          "label": "The outcome I deliver",
-          "details": "Lead with the visitor's result, then support it with proof and process.",
-          "recommended": true,
-          "recommendation_reason": "Outcome-first messaging is clearest for new visitors who do not yet know you."
-        },
-        {
-          "id": "work",
-          "label": "My best work",
-          "details": "Lead with a visual project gallery and let examples establish credibility."
-        },
-        {
-          "id": "story",
-          "label": "My personal story",
-          "details": "Lead with identity and background; useful when personality is the main differentiator."
-        }
+      "i": "content-priority", "p": "What must visitors understand first?", "w": "The first-screen message determines the page hierarchy and primary call to action.", "t": "s", "r": true,
+      "o": [
+    ["outcome", "The outcome I deliver", "Lead with the visitor's result, then support it with proof and process.", "Outcome-first messaging is clearest for new visitors who do not yet know you."],
+    ["work", "My best work", "Lead with a visual project gallery and let examples establish credibility."],
+    ["story", "My personal story", "Lead with identity and background; useful when personality is the main differentiator."]
       ]
     },
     {
-      "id": "launch-scope",
-      "prompt": "What belongs in the first release?",
-      "why": "A smaller launch is faster to polish; extra sections increase writing and testing work.",
-      "type": "multi",
-      "required": true,
-      "min": 2,
-      "max": 4,
-      "allow_other": true,
-      "options": [
-        {
-          "id": "home",
-          "label": "Home",
-          "details": "Core proposition, proof, and primary call to action.",
-          "recommended": true,
-          "recommendation_reason": "Every usable first release needs a clear entry point."
-        },
-        {
-          "id": "projects",
-          "label": "Projects",
-          "details": "Selected case studies with outcomes and your contribution."
-        },
-        {
-          "id": "about",
-          "label": "About",
-          "details": "Background, working style, and a portrait or personal visual."
-        },
-        {
-          "id": "writing",
-          "label": "Writing",
-          "details": "Articles or notes; valuable only if content is ready to maintain."
-        },
-        {
-          "id": "contact",
-          "label": "Contact",
-          "details": "A focused conversion path with email, form, or booking link."
-        }
+      "i": "launch-scope", "p": "What belongs in the first release?", "w": "A smaller launch is faster to polish; extra sections increase writing and testing work.", "t": "m", "r": true, "a": true, "n": 2, "m": 4,
+      "o": [
+    ["home", "Home", "Core proposition, proof, and primary call to action.", "Every usable first release needs a clear entry point."],
+    ["projects", "Projects", "Selected case studies with outcomes and your contribution."],
+    ["about", "About", "Background, working style, and a portrait or personal visual."],
+    ["writing", "Writing", "Articles or notes; valuable only if content is ready to maintain."],
+    ["contact", "Contact", "A focused conversion path with email, form, or booking link."]
+      ]
+    },
+    {
+      "i": "contact-path", "p": "How should visitors make contact?", "w": "This changes form handling, privacy requirements, and launch testing.", "t": "s", "r": true, "if": ["launch-scope", "contact"],
+      "o": [
+    ["email", "Email link", "No backend and minimal privacy overhead.", "It is the smallest reliable launch surface."],
+    ["form", "Contact form", "A structured inquiry flow that requires delivery, spam, and failure handling."],
+    ["booking", "Booking link", "Fast scheduling through an external service and its availability rules."]
       ]
     }
   ]

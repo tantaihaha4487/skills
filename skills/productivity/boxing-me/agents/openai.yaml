@@ -1,4 +1,4 @@
 interface:
   display_name: "Box My Decisions"
   short_description: "Turn many questions into one decision page"
-  default_prompt: "Use $boxing-me to collect the decisions you need from me in one interactive page, recommend choices, and continue after I save."
+  default_prompt: "Use $boxing-me to investigate edge cases, map dependent decisions into one interactive page, recommend choices, and continue after I save."
