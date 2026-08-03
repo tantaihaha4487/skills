@@ -22,16 +22,11 @@ Install a single skill by name:
 npx skills@latest add tantaihaha4487/skills --skill papermc-plugin-development
 npx skills@latest add tantaihaha4487/skills --skill fabric-mod-development
 npx skills@latest add tantaihaha4487/skills --skill iris-shader-development
-npx skills@latest add tantaihaha4487/skills --skill boxing-me
 ```
 
 Use `--global` with `--agent codex` to install them in your user-level Codex skills directory.
 
 ## Included skills
-
-### Box My Decisions
-
-[`boxing-me`](skills/productivity/boxing-me/SKILL.md) replaces a long clarification interview with one interactive decision page. It presents checkboxes or single-choice cards, detailed tradeoffs, clearly explained recommendations, visual review, autosave, and a response file the agent can use to continue.
 
 ### PaperMC Plugin Development
 
