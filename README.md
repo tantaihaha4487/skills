@@ -22,6 +22,7 @@ Install a single skill by name:
 npx skills@latest add tantaihaha4487/skills --skill papermc-plugin-development
 npx skills@latest add tantaihaha4487/skills --skill fabric-mod-development
 npx skills@latest add tantaihaha4487/skills --skill iris-shader-development
+npx skills@latest add tantaihaha4487/skills --skill thai-docs
 ```
 
 Use `--global` with `--agent codex` to install them in your user-level Codex skills directory.
@@ -32,19 +33,17 @@ Use `--global` with `--agent codex` to install them in your user-level Codex ski
 
 [`papermc-plugin-development`](skills/minecraft/papermc-plugin-development/SKILL.md) helps analyze, design, implement, debug, test, migrate, and maintain PaperMC plugins, including Folia-compatible projects.
 
-It covers lifecycle and thread ownership, commands, events, entities, inventories, Adventure components, persistent data, configuration, databases, plugin messaging, registries, recipes, performance, CI, publishing, and runtime failures.
-
 ### Fabric Mod Development
 
 [`fabric-mod-development`](skills/minecraft/fabric-mod-development/SKILL.md) helps analyze, implement, debug, test, and migrate Fabric Minecraft mods while preserving exact Minecraft, mappings, Loader, Loom, and Fabric API compatibility.
-
-It covers registries, events, mixins, networking, persistence, data generation, client rendering, configuration, tests, builds, releases, and Minecraft version ports.
 
 ### Iris Shader Development
 
 [`iris-shader-development`](skills/minecraft/iris-shader-development/SKILL.md) covers version-aware Minecraft shader-pack development for Iris with Sodium, including gbuffers, shadows, deferred/composite/final passes, shader properties, buffer formats, compatibility debugging, performance, and packaging.
 
-Important compatibility rule: Iris buffer formats such as `RGBA16F` and `RGBA8` belong in `shaders/shaders.properties`, for example `colortex0Format=RGBA16F`. They must not be used as GLSL identifiers such as `const int colortex0Format = RGBA16F;`, or the shader compiler will report an undefined-variable error.
+### Thai Documentation
+
+[`thai-docs`](skills/productivity/thai-docs/SKILL.md) combines Thai DOCX/PDF creation with rigorous verification: A4 and margin checks, Thai font binding and embedding, LibreOffice export, text extraction, citation checks, and rendered-page inspection.
 
 ## Engineering workflow
 
