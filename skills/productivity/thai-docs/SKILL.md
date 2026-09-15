@@ -1,6 +1,6 @@
 ---
 name: thai-docs
-description: Create and verify formal Thai DOCX/PDF documents with standard layout, bundled Thai fonts, and evidence gates.
+description: Create, edit, and review Thai DOCX/PDF essays and reports, with document-specific structure, consistent typography, template matching, and rendered layout checks.
 license: MIT
 metadata:
   hermes:
@@ -24,7 +24,7 @@ Use this single skill for Thai essays, reports, academic audits, DOCX/PDF creati
 
 ## Portable environment discovery
 
-Do not use machine-specific absolute paths from this skill. Resolve tools at runtime with `shutil.which` or equivalent. Accept explicit paths from the user. Use a temporary working directory for renders and manifests. Discover fonts with `fc-match`/`fc-list`; prefer the requested family, then report a limitation if unavailable. Do not bundle or silently substitute a font unless the user approves.
+Do not use machine-specific absolute paths from this skill. Resolve tools at runtime with `shutil.which` or equivalent. Accept explicit paths from the user. Use a temporary working directory for renders and manifests. Discover fonts with `fc-match`/`fc-list` and inspect the bundled fonts; use the requested family and report a limitation if unavailable. When no family is specified, use the default below. Do not silently substitute a different family for an explicit font requirement.
 
 Required tools depend on the task:
 
@@ -35,16 +35,22 @@ Required tools depend on the task:
 
 If a required tool is absent, return `BLOCKED` with the missing executable and a portable installation hint; do not fake the result.
 
-## Formal Thai standard profile
+## Select structure and layout
 
-Use this profile for official, academic, school, and government-style Thai documents unless the supplied exemplar or explicit request overrides it.
+Before creating or restructuring a document, read [references/document-structure-and-layout.md](references/document-structure-and-layout.md). Choose the essay, report, or official-document guidance according to the requested deliverable. For a formatting-only edit, preserve content and section order.
+
+Resolve layout choices in this order: explicit user requirements, supplied institutional template or exemplar, existing document styles for edits, then the defaults below. Record the chosen values once and reuse them throughout generation and review. Ask only about missing requirements that materially affect the result, such as a mandatory page limit or institutional template.
+
+## Default formal Thai profile
+
+These are fallback design choices, not a universal Thai institutional standard. Official documents follow their supplied form or institutional requirements.
 
 - Paper: A4, 21 × 29.7 cm.
 - Margins: top/bottom 2.54 cm and left/right 2.54 cm by default. Use 3.00 cm left/right only when the exemplar or institutional requirement specifies it.
-- Body font: `TH Sarabun New` or `TH SarabunPSK` when the source/exemplar uses it. Use `TH SarabunIT๙` when Thai numeral input or the exemplar requires it. Do not silently switch between families.
+- Body font: bundled `TH Sarabun New` when no family is specified. Preserve `TH SarabunPSK`, `TH SarabunIT๙`, or another family when requested or used by the template. Thai digits alone do not require changing the family; verify glyph coverage. Do not silently switch between families.
 - Body size: 16 pt unless the institutional template specifies another size.
 - Title: centered, black, bold, normally 18 pt. Use 20–22 pt only when the exemplar or document hierarchy requires it.
-- Headings: black, bold, left-aligned, numbered continuously when the document uses numbered sections.
+- Headings: black, bold, left-aligned; use semantic Heading styles and a consistent hierarchy. Preserve the selected numbering scheme when sections are numbered. Essays normally have a title and unlabelled body paragraphs.
 - Body alignment: justified with first-line indent around 1.25 cm unless the exemplar uses block paragraphs.
 - Body line spacing: 1.5 lines with 0 pt before and after for standard formal reports.
 - Tables and references: single-spaced, readable cell padding, stable column widths, and no decorative colors unless required by the template.
@@ -110,28 +116,19 @@ Recommended audit headings in Thai:
 - For formal reports, use evidence→interpretation→decision. Label monitoring thresholds, stop criteria, and success criteria as author-proposed unless an inspected source defines them.
 - For an explicit “remove all” request such as `.[2][14]`, remove `\[\d+\]` markers from the requested scope, including bibliography labels when “all” is stated. Preserve dates, years, measurements, percentages, ranges, section numbers, and chemical notation. Rebuild and verify both artifacts.
 
-### Portable Thai layout defaults
+### Apply the selected layout
 
-Use explicit values from the request first. Otherwise use:
+Use the selected profile above and the structure/layout reference; do not introduce a second set of defaults. Define reusable Title, Heading, Normal, Caption, and table/reference styles as needed. Set paragraph spacing and indentation through styles rather than empty paragraphs, spaces, or tabs. Apply the font bindings from the bundled-font section to generated text, including tables, headers, and footers. Remove inherited theme borders/colors when a plain black academic style is requested.
 
-- A4: 21 × 29.7 cm.
-- Margins: 2.54 cm on all sides for compact academic reports; use 3.0 cm left/right only when the requested school profile requires it.
-- Font: requested installed Thai family, commonly `TH SarabunPSK`.
-- Body: 16 pt, justified; first-line indent about 1.25–1.5 cm.
-- Standard essay line spacing: 1.5. Compact LangTake-style reports: approximately 1.05–1.15.
-- Title: centered, black, bold, approximately 18–22 pt.
-- Tables and bibliography: single-spaced, thin borders, readable wrapping.
-- Keep each figure and caption together; avoid blank spacer pages.
-
-Bind Thai fonts explicitly on every run and the Normal style: `w:ascii`, `w:hAnsi`, `w:eastAsia`, `w:cs`, `w:szCs`, and `w:lang` where supported. Remove inherited theme borders/colors when a plain black academic style is requested.
+For edits, modify the existing document when practical; rebuilding from extracted text can discard numbering, fields, section breaks, and other layout information.
 
 ### Build and export gates
 
-1. Build from a source-of-truth Markdown or structured input with a deterministic generator.
+1. For new documents, build from source-of-truth Markdown or structured input with a deterministic generator. For existing documents, retain their structure and change only the requested content or formatting in the derived copy.
 2. Validate the DOCX package and inspect OOXML for A4 dimensions, margins, headings, tables, figures, footer PAGE fields, font bindings, and forbidden draft markers.
 3. Convert the exact output DOCX with LibreOffice, using an explicit output directory.
 4. Inspect the exact PDF with `pdfinfo`, `pdffonts`, and `pdftotext`.
-5. Render every PDF page and create a contact sheet. Inspect the first page, changed pages, dense tables, every figure/caption pair, appendix, and final bibliography page.
+5. Render every PDF page and create a contact sheet. Inspect all pages for balance, unexpected blanks, and section flow. Inspect the first page, changed pages, dense tables, every figure/caption pair, appendix, and final bibliography page at readable resolution. Correct layout defects using the reference's pagination guidance, then export and review again.
 6. Maintain an evidence manifest with source/output paths, tool versions when relevant, validation output, PDF geometry/page count, font result, text probes, citation probes, render coverage, visual-review scope, and hashes when integrity matters. Redact secrets.
 7. After every substantive edit, rerun all applicable gates. Do not carry forward a previous PASS.
 
@@ -173,5 +170,6 @@ The checker exits nonzero for a failed required check, emits JSON evidence, neve
 
 - `references/font-source.md` — source URL, archive hash, verified families, metadata, and redistribution caveat.
 - `references/numeric-citation-marker-removal-and-verification.md` — exact citation-marker scope and probes.
-- `references/thai-essay-layout-notes.md` — concise Thai essay layout defaults.
+- `references/thai-essay-layout-notes.md` — historical personal essay preferences; read only when the current request calls for that style.
+- [references/document-structure-and-layout.md](references/document-structure-and-layout.md) — structure by document type, reusable styles, template inspection, and pagination fixes; read for creation or layout changes.
 - Other reference files cover essay style and image/recipe workflows; load them only when the task needs those variants.

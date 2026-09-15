@@ -1,5 +1,7 @@
 # Thai essay style preferences captured from session
 
+These are preferences from a past task, not requirements for every document. Apply them when the current request calls for this essay style; otherwise use the profile selection in SKILL.md.
+
 - Use formal Thai prose for essays and school-style documents.
 - Preserve the standard 3-part essay structure: คำนำ / เนื้อเรื่อง / สรุป.
 - If the user asks for a one-page essay, keep the content concise but do not break the structure.
