@@ -41,13 +41,15 @@ Before creating or restructuring a document, read [references/document-structure
 
 Resolve layout choices in this order: explicit user requirements, supplied institutional template or exemplar, existing document styles for edits, then the defaults below. Record the chosen values once and reuse them throughout generation and review. Ask only about missing requirements that materially affect the result, such as a mandatory page limit or institutional template.
 
+For reports matching the user's bioremediation/Exxon Valdez example or requesting the user's preferred compact report style, read [references/compact-report-example.md](references/compact-report-example.md) and use its measured profile instead of the fallback values below. Keep this report preference separate from essay and official-document requirements.
+
 ## Default formal Thai profile
 
 These are fallback design choices, not a universal Thai institutional standard. Official documents follow their supplied form or institutional requirements.
 
 - Paper: A4, 21 × 29.7 cm.
 - Margins: top/bottom 2.54 cm and left/right 2.54 cm by default. Use 3.00 cm left/right only when the exemplar or institutional requirement specifies it.
-- Body font: bundled `TH Sarabun New` when no family is specified. Preserve `TH SarabunPSK`, `TH SarabunIT๙`, or another family when requested or used by the template. Thai digits alone do not require changing the family; verify glyph coverage. Do not silently switch between families.
+- Document font: `TH SarabunPSK` is the user's selected default. Use one family throughout the document, including title, headings, body, tables, captions, bibliography, headers, footers, and page fields. Use `TH SarabunIT๙` instead when the user selects it. If the choice is unresolved or a template conflicts with this preference, ask the user to choose before generating; do not mix the two families or silently substitute one. An already explicit choice does not need reconfirmation. Thai digits alone do not require changing the family; verify glyph coverage.
 - Body size: 16 pt unless the institutional template specifies another size.
 - Title: centered, black, bold, normally 18 pt. Use 20–22 pt only when the exemplar or document hierarchy requires it.
 - Headings: black, bold, left-aligned; use semantic Heading styles and a consistent hierarchy. Preserve the selected numbering scheme when sections are numbered. Essays normally have a title and unlabelled body paragraphs.
@@ -65,12 +67,12 @@ The bundled font files were obtained from the Ubon Ratchathani University source
 
 `https://www.ubs.ubu.ac.th/font/THSarabun.rar`
 
-The archive includes TH Sarabun New and TH SarabunIT๙ families with regular, bold, italic, and bold-italic faces, plus an installation guide. They are stored under `assets/fonts/THSarabunNew/` for reproducible document generation. The source URL and archive hash must remain recorded in the repository change report. Use only the font family and face verified by metadata; do not rename font files to hide family differences.
+Fonts are grouped by family under `assets/fonts/`: `THSarabunNew/`, `THSarabunIT9/`, `THNiramit/`, and the separately sourced `THSarabunPSK/`. The original installation guide is under `assets/guides/`. See [references/font-source.md](references/font-source.md) for provenance and internal family names. Retain the source URL and archive hash. Use only the font family and face verified by metadata; directory names do not override internal font metadata.
 
 Before using a bundled font:
 
 1. Inspect its internal family, full name, PostScript name, style, and glyph coverage with `fc-query` or `fc-scan`.
-2. Bind the selected family to `w:ascii`, `w:hAnsi`, `w:eastAsia`, and `w:cs` on every run and the Normal style.
+2. Bind the same selected family to `w:ascii`, `w:hAnsi`, `w:eastAsia`, and `w:cs` on every generated text run and all used text styles, including Normal, headings, captions, and footers. Remove competing theme font declarations. Regular, bold, italic, and bold-italic faces must belong to that family.
 3. Set `w:szCs` and `w:lang` where supported for Thai complex-script consistency.
 4. Verify the exported PDF with `pdffonts` and report the actual embedded face.
 5. Do not install fonts system-wide as part of document generation. Use the bundled files through an explicit temporary font directory or the host's verified font installation.

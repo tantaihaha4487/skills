@@ -30,6 +30,16 @@ SHA-256 values:
 
 ## Metadata verification
 
+### Asset layout
+
+- `assets/fonts/THSarabunNew/`: four TH Sarabun New faces from the archive.
+- `assets/fonts/THSarabunIT9/`: four archive faces reporting both TH SarabunPSK and TH SarabunIT๙ family names.
+- `assets/fonts/THNiramit/`: four archive faces reporting TH Niramit AS and TH NiramitIT๙ family names. Original filenames are preserved.
+- `assets/fonts/THSarabunPSK/`: four separately sourced TH SarabunPSK faces listed above.
+- `assets/guides/`: the original Thai installation guide PDF.
+
+Eight byte-identical font copies from the archive's `F0nt/THSarabunIT·/` directory were removed after SHA-256 and byte comparisons. Every distinct font file is retained. The two SarabunPSK-labelled sets are distinct files; select only the intended set for a temporary font environment to avoid family-name collisions.
+
 The font files were inspected with `fc-scan`. The internal family metadata includes:
 
 - `TH Sarabun New`
