@@ -1,10 +1,10 @@
 ---
 name: thai-docs
-description: Create and verify Thai DOCX/PDF reports end to end with portable evidence gates.
+description: Create and verify formal Thai DOCX/PDF documents with standard layout, bundled Thai fonts, and evidence gates.
 license: MIT
 metadata:
   hermes:
-    tags: [DOCX, PDF, Thai, verification, A4, fonts, citations]
+    tags: [DOCX, PDF, Thai, formal-documents, verification, A4, fonts, citations]
     related_skills: [pdf, docx]
 ---
 
@@ -34,6 +34,52 @@ Required tools depend on the task:
 - Pillow only for contact sheets or image checks.
 
 If a required tool is absent, return `BLOCKED` with the missing executable and a portable installation hint; do not fake the result.
+
+## Formal Thai standard profile
+
+Use this profile for official, academic, school, and government-style Thai documents unless the supplied exemplar or explicit request overrides it.
+
+- Paper: A4, 21 × 29.7 cm.
+- Margins: top/bottom 2.54 cm and left/right 2.54 cm by default. Use 3.00 cm left/right only when the exemplar or institutional requirement specifies it.
+- Body font: `TH Sarabun New` or `TH SarabunPSK` when the source/exemplar uses it. Use `TH SarabunIT๙` when Thai numeral input or the exemplar requires it. Do not silently switch between families.
+- Body size: 16 pt unless the institutional template specifies another size.
+- Title: centered, black, bold, normally 18 pt. Use 20–22 pt only when the exemplar or document hierarchy requires it.
+- Headings: black, bold, left-aligned, numbered continuously when the document uses numbered sections.
+- Body alignment: justified with first-line indent around 1.25 cm unless the exemplar uses block paragraphs.
+- Body line spacing: 1.5 lines with 0 pt before and after for standard formal reports.
+- Tables and references: single-spaced, readable cell padding, stable column widths, and no decorative colors unless required by the template.
+- Header/footer: preserve official identifiers, document title, revision/date fields, and page numbers when present. Keep author/student metadata in the footer only when requested.
+- Avoid emoji, informal slang, visible drafting labels, Markdown markers, and decorative theme colors in formal Thai documents.
+
+When a supplied DOCX or PDF exemplar exists, inspect it first and let measurable exemplar properties override these defaults.
+
+## Bundled official Thai font set
+
+The bundled font files were obtained from the Ubon Ratchathani University source URL:
+
+`https://www.ubs.ubu.ac.th/font/THSarabun.rar`
+
+The archive includes TH Sarabun New and TH SarabunIT๙ families with regular, bold, italic, and bold-italic faces, plus an installation guide. They are stored under `assets/fonts/THSarabunNew/` for reproducible document generation. The source URL and archive hash must remain recorded in the repository change report. Use only the font family and face verified by metadata; do not rename font files to hide family differences.
+
+Before using a bundled font:
+
+1. Inspect its internal family, full name, PostScript name, style, and glyph coverage with `fc-query` or `fc-scan`.
+2. Bind the selected family to `w:ascii`, `w:hAnsi`, `w:eastAsia`, and `w:cs` on every run and the Normal style.
+3. Set `w:szCs` and `w:lang` where supported for Thai complex-script consistency.
+4. Verify the exported PDF with `pdffonts` and report the actual embedded face.
+5. Do not install fonts system-wide as part of document generation. Use the bundled files through an explicit temporary font directory or the host's verified font installation.
+6. If redistribution terms are unclear, preserve the source URL and archive checksum and report the limitation rather than claiming a license that was not verified.
+
+## Formal Thai formatting verification
+
+In addition to the general gates below, probe the final artifacts for:
+
+- A4 page geometry and expected margins.
+- Correct Thai family and face for title, headings, body, tables, and references.
+- Consistent alignment and line spacing by section.
+- Continuous heading and page numbering.
+- No blank pages, orphan headings, clipped text, overlapping objects, broken glyphs, malformed URLs, or split figure captions.
+- No accidental question-mark punctuation in user-facing document prose, except URL query parameters when they are part of a required URL.
 
 ## Workflow A — audit an existing report
 
@@ -125,6 +171,7 @@ The checker exits nonzero for a failed required check, emits JSON evidence, neve
 
 ## Bundled references
 
+- `references/font-source.md` — source URL, archive hash, verified families, metadata, and redistribution caveat.
 - `references/numeric-citation-marker-removal-and-verification.md` — exact citation-marker scope and probes.
 - `references/thai-essay-layout-notes.md` — concise Thai essay layout defaults.
 - Other reference files cover essay style and image/recipe workflows; load them only when the task needs those variants.
