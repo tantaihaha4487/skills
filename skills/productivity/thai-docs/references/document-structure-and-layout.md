@@ -5,7 +5,7 @@ Use the precedence and numeric defaults in SKILL.md. This reference explains how
 ## Structure by deliverable
 
 - **Essay:** use a title followed by connected prose with an introduction, development, and conclusion. These are rhetorical parts, not mandatory visible headings. Choose paragraph count for the argument and requested length. Add section labels only when the assignment asks for them. Include author/student details only when supplied and requested, in the location specified by the assignment.
-- **Report:** organize sections around the subject and reader's needs. An empirical report may need objectives, methods, results, discussion, and conclusions; a literature report may need thematic sections and synthesis instead. Use only sections the content supports. Keep heading levels consecutive and numbering consistent. Include a cover, contents page, abstract, or appendices when requested or justified by the document's length and purpose.
+- **Report:** organize sections around the subject and reader's needs. An empirical report may need objectives, methods, results, discussion, and conclusions; a literature report may need thematic sections and synthesis instead. Use only sections the content supports. Keep heading levels consecutive; if headings are numbered, keep that numbering consistent. Include a cover, contents page, abstract, or appendices when requested or justified by the document's length and purpose. For the user's current preferred report style, use the later preferences in [compact-report-example.md](compact-report-example.md).
 - **Official document:** follow the supplied form, field order, identifiers, signature areas, and institution's typography. If no form is available, clarify the document type and mandatory requirements before claiming compliance. A generic formal report layout is only a draft fallback.
 
 For formatting-only requests, retain the existing text, section order, citations, and meaning. For restructuring requests, map existing material into the new outline before editing so that caveats and necessary sections are not lost.
@@ -20,7 +20,7 @@ Distinguish intentional variations, such as a cover or landscape table section, 
 
 ## Implement consistent formatting
 
-- Use Title for the document title and Heading 1/2/3 for actual section levels. Use automatic numbering and contents fields when supported, and verify their displayed values after export.
+- Use Title for the document title and Heading 1/2/3 for actual section levels, including unnumbered headings. Use automatic numbering only when the selected profile calls for it. Use contents fields when they update reliably, and verify displayed page numbers after final export. A borderless two-column contents layout is suitable when fields cannot reproduce the requested style; confirm every number against the rendered destination page.
 - Define body indentation, alignment, and spacing once. Give captions, table cells, references, and metadata their own styles where their layout differs. Do not apply the body's first-line indent to every paragraph indiscriminately.
 - Set headings to stay with their following paragraph. Enable widow/orphan control for body text; avoid keeping entire long paragraphs or whole sections together if that creates large gaps.
 - Use paragraph and section settings for layout. Avoid manual line breaks at the visual end of each line: Thai text must reflow when fonts or page widths change. Inspect Thai marks and justified spacing in the render; do not insert spaces between Thai words merely to force alignment.

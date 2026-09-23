@@ -1,117 +1,177 @@
 #!/usr/bin/env python3
-"""Portable, dependency-light verification for a Thai DOCX/PDF pair.
+"""Check a Thai DOCX and, when available, its rendered PDF. Emit JSON evidence."""
 
-Returns JSON evidence. Required checks fail the process; optional unavailable
-checks are reported without pretending they passed.
-"""
 from __future__ import annotations
-import argparse, hashlib, json, re, shutil, subprocess, sys, zipfile
+
+import argparse
+import hashlib
+import json
+import re
+import shutil
+import subprocess
+import tempfile
+import zipfile
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
 
-def run(cmd):
-    exe = shutil.which(cmd[0])
-    if not exe:
-        return None, f"missing executable: {cmd[0]}"
+W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def run(command: list[str]) -> tuple[subprocess.CompletedProcess[str] | None, str | None]:
+    executable = shutil.which(command[0])
+    if not executable:
+        return None, f"missing executable: {command[0]}"
     try:
-        p = subprocess.run([exe, *cmd[1:]], text=True, capture_output=True, check=False)
-        return {"returncode": p.returncode, "stdout": p.stdout, "stderr": p.stderr}, None
-    except OSError as e:
-        return None, str(e)
+        return subprocess.run([executable, *command[1:]], text=True, capture_output=True, check=False), None
+    except OSError as error:
+        return None, str(error)
 
 
-def sha256(p):
-    h = hashlib.sha256()
-    with p.open("rb") as f:
-        for b in iter(lambda: f.read(1024 * 1024), b""):
-            h.update(b)
-    return h.hexdigest()
+def normalized_font(name: str) -> str:
+    return re.sub(r"[\s_-]+", "", re.sub(r"^[A-Z]{6}\+", "", name)).lower()
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--docx", type=Path, required=True)
-    ap.add_argument("--pdf", type=Path, required=True)
-    ap.add_argument("--render-dir", type=Path)
-    ap.add_argument("--required-font")
-    ap.add_argument("--forbid-numeric-markers", action="store_true")
-    args = ap.parse_args()
-    result = {"status": "PASS", "checks": {}, "limitations": [], "errors": []}
-    for label, p in (("docx", args.docx), ("pdf", args.pdf)):
-        if not p.is_file():
-            result["errors"].append(f"missing {label}: {p}")
+def check_docx(path: Path, required_font: str | None, forbid_markers: bool, checks: dict, errors: list[str]) -> None:
+    try:
+        with zipfile.ZipFile(path) as archive:
+            names = archive.namelist()
+            if archive.testzip() is not None or "[Content_Types].xml" not in names or "word/document.xml" not in names:
+                raise ValueError("incomplete or damaged DOCX package")
+            document = ET.fromstring(archive.read("word/document.xml"))
+            word_parts = [ET.fromstring(archive.read(name)) for name in names
+                          if name.startswith("word/") and name.endswith(".xml")]
+    except (OSError, zipfile.BadZipFile, ET.ParseError, ValueError, KeyError) as error:
+        checks["docx_package"] = False
+        errors.append(f"DOCX package check failed: {error}")
+        return
+
+    checks["docx_package"] = True
+    page_sizes = [(int(node.get(W + "w", "0")), int(node.get(W + "h", "0")))
+                  for node in document.iter(W + "pgSz")]
+    checks["docx_has_a4_dimensions"] = bool(page_sizes) and all(
+        abs(width - 11906) <= 1 and abs(height - 16838) <= 1 for width, height in page_sizes
+    )
+    if not checks["docx_has_a4_dimensions"]:
+        errors.append("DOCX page geometry is not A4 portrait in every section")
+
+    all_text = " ".join(node.text or "" for root in word_parts for node in root.iter(W + "t"))
+    checks["docx_numeric_markers"] = len(re.findall(r"\[\d+\]", all_text))
+    if forbid_markers and checks["docx_numeric_markers"]:
+        errors.append("numeric citation markers remain in DOCX")
+
+    font_nodes = [node for root in word_parts for node in root.iter(W + "rFonts")]
+    slots = ("ascii", "hAnsi", "eastAsia", "cs")
+    checks["docx_has_font_bindings"] = bool(font_nodes) and all(
+        all(node.get(W + slot) for slot in slots) for node in font_nodes
+    )
+    if not checks["docx_has_font_bindings"]:
+        errors.append("DOCX contains incomplete four-slot font bindings")
+    if required_font:
+        expected = normalized_font(required_font)
+        checks["docx_required_font_only"] = bool(font_nodes) and all(
+            normalized_font(node.get(W + slot, "")) == expected
+            for node in font_nodes for slot in slots
+        )
+        if not checks["docx_required_font_only"]:
+            errors.append(f"DOCX contains font bindings outside {required_font}")
+
+
+def check_pdf(path: Path, required_font: str | None, forbid_markers: bool,
+              render_dir: Path | None, checks: dict, errors: list[str]) -> None:
+    info, issue = run(["pdfinfo", str(path)])
+    if issue or info is None or info.returncode:
+        errors.append(f"PDF metadata check failed: {issue or (info.stderr.strip() if info else '')}")
+        return
+    page_match = re.search(r"^Pages:\s+(\d+)", info.stdout, re.M)
+    checks["pdf_pages"] = int(page_match.group(1)) if page_match else None
+    page_info, page_issue = run(["pdfinfo", "-f", "1", "-l", str(checks["pdf_pages"] or 1), str(path)])
+    page_sizes = re.findall(r"^Page\s+\d+ size:\s+([\d.]+) x ([\d.]+) pts", page_info.stdout if page_info else "", re.M)
+    checks["pdf_a4"] = bool(checks["pdf_pages"]) and not page_issue and page_info is not None and page_info.returncode == 0 and len(page_sizes) == checks["pdf_pages"] and all(
+        abs(float(width) - 595.28) < 1 and abs(float(height) - 841.89) < 1
+        for width, height in page_sizes
+    )
+    if not checks["pdf_a4"]:
+        errors.append("PDF page count or A4 portrait geometry check failed")
+
+    text, issue = run(["pdftotext", str(path), "-"])
+    if issue or text is None or text.returncode:
+        errors.append(f"PDF text extraction failed: {issue or (text.stderr.strip() if text else '')}")
+    else:
+        checks["pdf_numeric_markers"] = len(re.findall(r"\[\d+\]", text.stdout))
+        checks["pdf_replacement_chars"] = text.stdout.count("�")
+        if forbid_markers and checks["pdf_numeric_markers"]:
+            errors.append("numeric citation markers remain in PDF")
+        if checks["pdf_replacement_chars"]:
+            errors.append("PDF contains replacement characters")
+
+    fonts, issue = run(["pdffonts", str(path)])
+    if issue or fonts is None or fonts.returncode:
+        errors.append(f"PDF font inspection failed: {issue or (fonts.stderr.strip() if fonts else '')}")
+    else:
+        rows = [line.split() for line in fonts.stdout.splitlines()[2:] if line.strip()]
+        checks["pdf_font_names"] = [row[0] for row in rows]
+        checks["pdf_embedded_fonts"] = bool(rows) and all(len(row) >= 5 and row[3].lower() == "yes" for row in rows)
+        if not checks["pdf_embedded_fonts"]:
+            errors.append("PDF has unembedded or uninspectable fonts")
+        if required_font:
+            expected = normalized_font(required_font)
+            checks["required_font_only"] = bool(rows) and all(normalized_font(row[0]).startswith(expected) for row in rows)
+            if not checks["required_font_only"]:
+                errors.append(f"PDF contains a font outside {required_font}")
+
+    if render_dir:
+        render_dir.mkdir(parents=True, exist_ok=True)
+        fresh_dir = Path(tempfile.mkdtemp(prefix="run-", dir=render_dir))
+        render, issue = run(["pdftoppm", "-png", "-r", "120", str(path), str(fresh_dir / "page")])
+        if issue or render is None or render.returncode:
+            errors.append(f"PDF rendering failed: {issue or (render.stderr.strip() if render else '')}")
         else:
-            result["checks"][f"{label}_sha256"] = sha256(p)
-    if result["errors"]:
-        result["status"] = "BLOCKED"
-        print(json.dumps(result, ensure_ascii=False, indent=2)); return 2
+            pages = sorted(fresh_dir.glob("page-*.png"))
+            checks["render_output_dir"] = str(fresh_dir)
+            checks["rendered_pages"] = len(pages)
+            if not pages or len(pages) != checks.get("pdf_pages"):
+                errors.append("rendered page count differs from PDF page count")
 
-    # DOCX package/text checks, no absolute paths or external libraries needed.
-    with zipfile.ZipFile(args.docx) as z:
-        names = set(z.namelist())
-        if "[Content_Types].xml" not in names or "word/document.xml" not in names:
-            result["errors"].append("invalid DOCX package")
-        xml = z.read("word/document.xml").decode("utf-8", "replace")
-        all_xml = "\n".join(z.read(n).decode("utf-8", "replace") for n in names if n.endswith(".xml"))
-    result["checks"]["docx_package"] = not result["errors"]
-    result["checks"]["docx_numeric_markers"] = len(re.findall(r"\[\d+\]", all_xml))
-    result["checks"]["docx_has_a4_dimensions"] = ("w:w=\"11906\"" in xml and "w:h=\"16838\"" in xml) or ("11906" in xml and "16838" in xml)
-    result["checks"]["docx_has_font_bindings"] = all(x in all_xml for x in ("w:eastAsia", "w:ascii", "w:hAnsi"))
-    if not result["checks"]["docx_package"] or result["checks"]["docx_numeric_markers"]:
-        result["errors"].append("DOCX package/marker check failed")
-    if not result["checks"]["docx_has_font_bindings"]:
-        result["limitations"].append("DOCX font bindings are not complete")
 
-    info, err = run(["pdfinfo", str(args.pdf)])
-    if err:
-        result["limitations"].append(err)
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--docx", type=Path, required=True)
+    parser.add_argument("--pdf", type=Path)
+    parser.add_argument("--render-dir", type=Path)
+    parser.add_argument("--required-font")
+    parser.add_argument("--forbid-numeric-markers", action="store_true")
+    args = parser.parse_args()
+    checks: dict = {}
+    limitations: list[str] = []
+    errors: list[str] = []
+    if not args.docx.is_file():
+        errors.append(f"missing DOCX: {args.docx}")
     else:
-        assert info is not None
-        result["checks"]["pdfinfo_returncode"] = info["returncode"]
-        result["checks"]["pdf_pages"] = int(re.search(r"^Pages:\s+(\d+)", info["stdout"], re.M).group(1)) if re.search(r"^Pages:\s+(\d+)", info["stdout"], re.M) else None
-        result["checks"]["pdf_a4"] = bool(re.search(r"Page size:\s+595(?:\.\d+)? x 841(?:\.\d+)? pts", info["stdout"]))
-        if info["returncode"] or not result["checks"]["pdf_a4"]:
-            result["errors"].append("PDF metadata/page geometry check failed")
-
-    text, err = run(["pdftotext", str(args.pdf), "-"])
-    if err:
-        result["limitations"].append(err)
-    else:
-        assert text is not None
-        pdf_text = text["stdout"]
-        result["checks"]["pdf_numeric_markers"] = len(re.findall(r"\[\d+\]", pdf_text))
-        result["checks"]["pdf_replacement_chars"] = pdf_text.count("�")
-        if result["checks"]["pdf_numeric_markers"] or result["checks"]["pdf_replacement_chars"]:
-            result["errors"].append("PDF text marker/replacement-character check failed")
-
-    fonts, err = run(["pdffonts", str(args.pdf)])
-    if err:
-        result["limitations"].append(err)
-    else:
-        assert fonts is not None
-        result["checks"]["pdf_embedded_fonts"] = bool(re.search(r"\byes\s+yes\b", fonts["stdout"]))
-        if args.required_font:
-            result["checks"]["required_font_seen"] = args.required_font.lower() in fonts["stdout"].lower()
-            if not result["checks"]["required_font_seen"]:
-                result["limitations"].append(f"requested font not visibly named by pdffonts: {args.required_font}")
-
-    if args.render_dir:
-        args.render_dir.mkdir(parents=True, exist_ok=True)
-        render, err = run(["pdftoppm", "-png", "-r", "120", str(args.pdf), str(args.render_dir / "page")])
-        if err:
-            result["limitations"].append(err)
+        checks["docx_sha256"] = sha256(args.docx)
+        check_docx(args.docx, args.required_font, args.forbid_numeric_markers, checks, errors)
+    if args.pdf:
+        if not args.pdf.is_file():
+            errors.append(f"missing PDF: {args.pdf}")
         else:
-            rendered = sorted(args.render_dir.glob("page-*.png"))
-            result["checks"]["rendered_pages"] = len(rendered)
-            if result["checks"].get("pdf_pages") and len(rendered) != result["checks"]["pdf_pages"]:
-                result["errors"].append("rendered page count differs from PDF page count")
+            checks["pdf_sha256"] = sha256(args.pdf)
+            check_pdf(args.pdf, args.required_font, args.forbid_numeric_markers, args.render_dir, checks, errors)
+    else:
+        limitations.append("DOCX-only check: pagination, embedded PDF fonts, and visual layout were not verified")
+        if args.render_dir:
+            errors.append("--render-dir requires --pdf")
+    status = "BLOCKED" if errors else ("PASS WITH LIMITATIONS" if limitations else "PASS")
+    print(json.dumps({"status": status, "checks": checks, "limitations": limitations, "errors": errors}, ensure_ascii=False, indent=2))
+    return 2 if errors else 0
 
-    if result["errors"]:
-        result["status"] = "BLOCKED"
-    elif result["limitations"]:
-        result["status"] = "PASS WITH LIMITATIONS"
-    print(json.dumps(result, ensure_ascii=False, indent=2))
-    return 0 if result["status"] != "BLOCKED" else 2
 
 if __name__ == "__main__":
     raise SystemExit(main())

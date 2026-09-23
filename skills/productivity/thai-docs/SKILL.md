@@ -26,14 +26,14 @@ Use this single skill for Thai essays, reports, academic audits, DOCX/PDF creati
 
 Do not use machine-specific absolute paths from this skill. Resolve tools at runtime with `shutil.which` or equivalent. Accept explicit paths from the user. Use a temporary working directory for renders and manifests. Discover fonts with `fc-match`/`fc-list` and inspect the bundled fonts; use the requested family and report a limitation if unavailable. When no family is specified, use the default below. Do not silently substitute a different family for an explicit font requirement.
 
-Required tools depend on the task:
+Useful tools depend on the task:
 
 - Python 3 with `python-docx` for DOCX creation/inspection.
-- LibreOffice for DOCX→PDF conversion.
+- A real DOCX renderer for page layout and DOCX→PDF conversion. Prefer LibreOffice when available. If it is absent, try an installed Microsoft Word automation path or another DOCX-capable converter that preserves the selected Thai font and document fields. Verify the alternative's output with the same PDF and visual checks; a text extractor or `python-docx` is not a page renderer. The `documents` skill's `render_docx.py` uses LibreOffice and is not an independent fallback.
 - Poppler tools: `pdfinfo`, `pdffonts`, `pdftotext`, and `pdftoppm` for PDF checks and renders.
 - Pillow only for contact sheets or image checks.
 
-If a required tool is absent, return `BLOCKED` with the missing executable and a portable installation hint; do not fake the result.
+If the preferred executable is absent, discover the equivalent capability before stopping. If no trustworthy converter is available, still complete a DOCX-only task's structural checks and state `PASS WITH LIMITATIONS` for the unverified pagination and visual layout; use `BLOCKED` when the requested PDF or a required visual/page-number check cannot be produced. Name the missing capability and a portable installation option. Never claim that DOCX structure checks prove rendered layout.
 
 ## Select structure and layout
 
@@ -41,7 +41,7 @@ Before creating or restructuring a document, read [references/document-structure
 
 Resolve layout choices in this order: explicit user requirements, supplied institutional template or exemplar, existing document styles for edits, then the defaults below. Record the chosen values once and reuse them throughout generation and review. Ask only about missing requirements that materially affect the result, such as a mandatory page limit or institutional template.
 
-For reports matching the user's bioremediation/Exxon Valdez example or requesting the user's preferred compact report style, read [references/compact-report-example.md](references/compact-report-example.md) and use its measured profile instead of the fallback values below. Keep this report preference separate from essay and official-document requirements.
+For general reports without a required institutional format, read [references/compact-report-example.md](references/compact-report-example.md) and use its **Current preferred report layout** with the measured body rhythm. The later user preferences supersede the older measured heading/list/table values. For an existing report, apply this profile when creation or restyling is in scope; preserve the existing layout for a content-only edit. Keep essay and official-document profiles separate.
 
 ## Default formal Thai profile
 
@@ -85,9 +85,9 @@ In addition to the general gates below, probe the final artifacts for:
 - A4 page geometry and expected margins.
 - Correct Thai family and face for title, headings, body, tables, and references.
 - Consistent alignment and line spacing by section.
-- Continuous heading and page numbering.
+- Correct heading numbering when the selected profile uses it, and correct page numbering when present.
 - No blank pages, orphan headings, clipped text, overlapping objects, broken glyphs, malformed URLs, or split figure captions.
-- No accidental question-mark punctuation in user-facing document prose, except URL query parameters when they are part of a required URL.
+- Preserve meaningful punctuation in quoted or supplied text; remove only accidental drafting artifacts.
 
 ## Workflow A — audit an existing report
 
@@ -128,7 +128,7 @@ For edits, modify the existing document when practical; rebuilding from extracte
 
 1. For new documents, build from source-of-truth Markdown or structured input with a deterministic generator. For existing documents, retain their structure and change only the requested content or formatting in the derived copy.
 2. Validate the DOCX package and inspect OOXML for A4 dimensions, margins, headings, tables, figures, footer PAGE fields, font bindings, and forbidden draft markers.
-3. Convert the exact output DOCX with LibreOffice, using an explicit output directory.
+3. Render the exact output DOCX with an available DOCX-capable engine, using an explicit output directory. Record the engine and version. Prefer LibreOffice when installed; if unavailable, verify that the alternative preserves Thai text, fonts, fields, tables, and page geometry before relying on it.
 4. Inspect the exact PDF with `pdfinfo`, `pdffonts`, and `pdftotext`.
 5. Render every PDF page and create a contact sheet. Inspect all pages for balance, unexpected blanks, and section flow. Inspect the first page, changed pages, dense tables, every figure/caption pair, appendix, and final bibliography page at readable resolution. Correct layout defects using the reference's pagination guidance, then export and review again.
 6. Maintain an evidence manifest with source/output paths, tool versions when relevant, validation output, PDF geometry/page count, font result, text probes, citation probes, render coverage, visual-review scope, and hashes when integrity matters. Redact secrets.
@@ -136,17 +136,13 @@ For edits, modify the existing document when practical; rebuilding from extracte
 
 ## Cross-machine reproducibility
 
-For the same semantic result on another machine, pin or record Python, `python-docx`, LibreOffice, Poppler, renderer, and Thai font family/file hash. Keep source Markdown and generator deterministic, use explicit locale/UTF-8, stable sorting, explicit output paths, and no timestamps in content. The bundled checker records artifact hashes and page geometry but cannot promise pixel-identical pagination across different LibreOffice/font builds. If the environment differs or a requested font is unavailable, classify the result as `PASS WITH LIMITATIONS` and report the exact difference; never silently substitute a font or claim byte-identical output.
+For the same semantic result on another machine, pin or record Python, `python-docx`, the DOCX renderer/converter, Poppler, and Thai font family/file hash. Keep source Markdown and generator deterministic, use explicit locale/UTF-8, stable sorting, explicit output paths, and no timestamps in content. The bundled checker records artifact hashes and page geometry but cannot promise pixel-identical pagination across renderer/font builds. If the environment differs or a requested font is unavailable, classify the result as `PASS WITH LIMITATIONS` and report the exact difference; never silently substitute a font or claim byte-identical output.
 
 ## Qualification status
 
 - **PASS** — requested artifacts exist and all applicable DOCX, PDF, text, font, and visual checks passed.
 - **PASS WITH LIMITATIONS** — artifacts pass available checks, but a named limitation remains, such as no Microsoft Word cross-check, unavailable original source, unavailable metadata, or representative rather than independent visual review.
-- **BLOCKED** — a required source, dependency, conversion, validation, or visual check failed or was not possible.
-
-## Question style
-
-Do not use `?` in questions directed to the user. Use concise prompts ending in a period, such as `Please provide the source file.`
+- **BLOCKED** — a required source, requested artifact, conversion, validation, or visual check failed or was not possible after checking available alternatives.
 
 ## Portable verification command
 
@@ -156,7 +152,7 @@ Use the bundled checker after producing a DOCX/PDF pair:
 python scripts/verify_thai_docs.py --docx output.docx --pdf output.pdf --render-dir /tmp/thai-docs-render
 ```
 
-The checker exits nonzero for a failed required check, emits JSON evidence, never assumes a fixed home directory, and reports unavailable optional checks separately. Use `--required-font FAMILY` when a font requirement is explicit.
+The checker exits nonzero for a failed required check, emits JSON evidence, and never assumes a fixed home directory. Use `--required-font FAMILY` when a font requirement is explicit and `--forbid-numeric-markers` only when the task requires removing those markers. It renders into a fresh subdirectory of `--render-dir` and reports that path. Its PASS covers automated checks only; inspect the page images before claiming visual PASS. When no converter is available for a DOCX-only task, omit `--pdf` for a structural `PASS WITH LIMITATIONS` result.
 
 ## Pitfalls
 
@@ -165,7 +161,7 @@ The checker exits nonzero for a failed required check, emits JSON evidence, neve
 - A URL or citation marker does not prove evidence support.
 - Falling concentration does not by itself prove biodegradation; weathering, dilution, transport, and redistribution may contribute.
 - Do not claim pixel-perfect reference matching unless the reference and rendered output were actually compared.
-- LibreOffice pagination can differ from Microsoft Word; report this limitation when Word was not tested.
+- Pagination can differ between DOCX renderers; report the engine used and any required cross-renderer check that was not performed.
 - Do not delete scientific digits when removing bracketed citation markers.
 
 ## Bundled references
