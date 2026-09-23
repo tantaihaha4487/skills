@@ -1,6 +1,6 @@
 ---
 name: thai-docs
-description: Create, edit, and review Thai DOCX/PDF essays and reports, with document-specific structure, consistent typography, template matching, and rendered layout checks.
+description: Create, edit, and review Thai DOCX/PDF essays, reports, and official documents, with document-specific structure, consistent typography, template matching, and rendered layout checks.
 license: MIT
 metadata:
   hermes:
@@ -39,6 +39,8 @@ If the preferred executable is absent, discover the equivalent capability before
 
 Before creating or restructuring a document, read [references/document-structure-and-layout.md](references/document-structure-and-layout.md). Choose the essay, report, or official-document guidance according to the requested deliverable. For a formatting-only edit, preserve content and section order.
 
+For a Thai internal government memorandum (`บันทึกข้อความ`, form `แบบที่ ๒๙`), also read [references/internal-government-memo-layout.md](references/internal-government-memo-layout.md). Apply that source-specific profile only to the memorandum, subject to explicit user requirements and any supplied, applicable institutional form. Do not transfer its header sizes, margins, or signature spacing to essays, reports, or every kind of official letter.
+
 Resolve layout choices in this order: explicit user requirements, supplied institutional template or exemplar, existing document styles for edits, then the defaults below. Record the chosen values once and reuse them throughout generation and review. Ask only about missing requirements that materially affect the result, such as a mandatory page limit or institutional template.
 
 For general reports without a required institutional format, read [references/compact-report-example.md](references/compact-report-example.md) and use its **Current preferred report layout** with the measured body rhythm. The later user preferences supersede the older measured heading/list/table values. For an existing report, apply this profile when creation or restyling is in scope; preserve the existing layout for a content-only edit. Keep essay and official-document profiles separate.
@@ -48,7 +50,7 @@ For general reports without a required institutional format, read [references/co
 These are fallback design choices, not a universal Thai institutional standard. Official documents follow their supplied form or institutional requirements.
 
 - Paper: A4, 21 × 29.7 cm.
-- Margins: top/bottom 2.54 cm and left/right 2.54 cm by default. Use 3.00 cm left/right only when the exemplar or institutional requirement specifies it.
+- Margins: top/bottom 2.54 cm and left/right 2.54 cm by default. A supplied exemplar or institutional requirement can override these; the internal-memo reference specifies an asymmetric 3.00 cm left / 2.00 cm right layout for that form.
 - Document font: `TH SarabunPSK` is the user's selected default. Use one family throughout the document, including title, headings, body, tables, captions, bibliography, headers, footers, and page fields. Use `TH SarabunIT๙` instead when the user selects it. If the choice is unresolved or a template conflicts with this preference, ask the user to choose before generating; do not mix the two families or silently substitute one. An already explicit choice does not need reconfirmation. Thai digits alone do not require changing the family; verify glyph coverage.
 - Body size: 16 pt unless the institutional template specifies another size.
 - Title: centered, black, bold, normally 18 pt. Use 20–22 pt only when the exemplar or document hierarchy requires it.
@@ -170,4 +172,5 @@ The checker exits nonzero for a failed required check, emits JSON evidence, and 
 - `references/numeric-citation-marker-removal-and-verification.md` — exact citation-marker scope and probes.
 - `references/thai-essay-layout-notes.md` — historical personal essay preferences; read only when the current request calls for that style.
 - [references/document-structure-and-layout.md](references/document-structure-and-layout.md) — structure by document type, reusable styles, template inspection, and pagination fixes; read for creation or layout changes.
+- [references/internal-government-memo-layout.md](references/internal-government-memo-layout.md) — source-backed layout for the `บันทึกข้อความ` (`แบบที่ ๒๙`) internal-government-memo form; read when that form is requested.
 - Other reference files cover essay style and image/recipe workflows; load them only when the task needs those variants.
