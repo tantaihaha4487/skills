@@ -54,7 +54,7 @@ These are fallback design choices, not a universal Thai institutional standard. 
 - Title: centered, black, bold, normally 18 pt. Use 20–22 pt only when the exemplar or document hierarchy requires it.
 - Headings: black, bold, left-aligned; use semantic Heading styles and a consistent hierarchy. Preserve the selected numbering scheme when sections are numbered. Essays normally have a title and unlabelled body paragraphs.
 - Body alignment: justified with first-line indent around 1.25 cm unless the exemplar uses block paragraphs.
-- Body line spacing: 1.5 lines with 0 pt before and after for standard formal reports.
+- Body line spacing: single (1.0) within each paragraph. Control the gap between paragraphs separately with `space_before`/`space_after`; do not increase within-paragraph line spacing to create paragraph separation.
 - Tables and references: single-spaced, readable cell padding, stable column widths, and no decorative colors unless required by the template.
 - Header/footer: preserve official identifiers, document title, revision/date fields, and page numbers when present. Keep author/student metadata in the footer only when requested.
 - Avoid emoji, informal slang, visible drafting labels, Markdown markers, and decorative theme colors in formal Thai documents.
@@ -131,7 +131,7 @@ For edits, modify the existing document when practical; rebuilding from extracte
 3. Render the exact output DOCX with an available DOCX-capable engine, using an explicit output directory. Record the engine and version. Prefer LibreOffice when installed; if unavailable, verify that the alternative preserves Thai text, fonts, fields, tables, and page geometry before relying on it.
 4. Inspect the exact PDF with `pdfinfo`, `pdffonts`, and `pdftotext`.
 5. Render every PDF page and create a contact sheet. Inspect all pages for balance, unexpected blanks, and section flow. Inspect the first page, changed pages, dense tables, every figure/caption pair, appendix, and final bibliography page at readable resolution. Correct layout defects using the reference's pagination guidance, then export and review again.
-6. Maintain an evidence manifest with source/output paths, tool versions when relevant, validation output, PDF geometry/page count, font result, text probes, citation probes, render coverage, visual-review scope, and hashes when integrity matters. Redact secrets.
+6. Maintain an internal evidence manifest with source/output paths, tool versions when relevant, validation output, PDF geometry/page count, font result, text probes, citation probes, render coverage, visual-review scope, and hashes when integrity matters. Redact secrets. Give the user the finished document by default; surface the manifest only when requested or when a specific limitation affects use of the result.
 7. After every substantive edit, rerun all applicable gates. Do not carry forward a previous PASS.
 
 ## Cross-machine reproducibility
