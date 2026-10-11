@@ -23,6 +23,7 @@ npx skills@latest add tantaihaha4487/skills --skill papermc-plugin-development
 npx skills@latest add tantaihaha4487/skills --skill fabric-mod-development
 npx skills@latest add tantaihaha4487/skills --skill iris-shader-development
 npx skills@latest add tantaihaha4487/skills --skill thai-docs
+npx skills@latest add tantaihaha4487/skills --skill bw-grid-pdf
 ```
 
 Use `--global` with `--agent codex` to install them in your user-level Codex skills directory.
@@ -44,6 +45,10 @@ Use `--global` with `--agent codex` to install them in your user-level Codex ski
 ### Thai Documentation
 
 [`thai-docs`](skills/productivity/thai-docs/SKILL.md) combines Thai DOCX/PDF creation with rigorous verification: A4 and margin checks, Thai font binding and embedding, LibreOffice export, text extraction, citation checks, and rendered-page inspection.
+
+### B/W Grid Cram Sheet PDF
+
+[`bw-grid-pdf`](skills/productivity/bw-grid-pdf/SKILL.md) produces dense, print-friendly landscape PDFs in pure black-and-white with a CSS Grid layout — ideal for cram sheets, cheat sheets, quick references, and study notes.
 
 ## Engineering workflow
 
