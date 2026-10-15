@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="480" viewBox="0 0 1280 480" role="img" aria-labelledby="title desc">
+  <title id="title">Agent Skills</title>
+  <desc id="desc">Reusable workflows for Minecraft development and document creation: PaperMC, Fabric, Iris shaders, Thai documents, and print-ready PDFs.</desc>
+  <defs>
+    <linearGradient id="background" x2="1" y2="1">
+      <stop stop-color="#171629"/>
+      <stop offset="1" stop-color="#302347"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#d9c9ff" stroke-opacity=".06"/>
+    </pattern>
+  </defs>
+  <rect width="1280" height="480" rx="24" fill="url(#background)"/>
+  <rect width="1280" height="480" rx="24" fill="url(#grid)"/>
+  <g font-family="DejaVu Sans, sans-serif">
+    <text x="64" y="66" fill="#c8b4fa" font-size="15" font-weight="700" letter-spacing="4">REUSABLE WORKFLOWS</text>
+    <text x="60" y="139" fill="#faf7ff" font-size="62" font-weight="700">Agent Skills</text>
+    <text x="64" y="182" fill="#c9c2d9" font-size="21">Build worlds. Craft documents. Verify the result.</text>
+    <rect x="64" y="222" width="560" height="196" rx="16" fill="#181c2b" stroke="#526c65"/>
+    <g transform="translate(88 248)" fill="none" stroke="#a6e3b7" stroke-width="3" stroke-linejoin="round">
+      <path d="m0 10 20-10 20 10-20 10Z M0 10v24l20 10 20-10V10 M20 20v24"/>
+    </g>
+    <text x="148" y="277" fill="#b8edc6" font-size="21" font-weight="700">Minecraft development</text>
+    <text x="88" y="328" fill="#eae6f4" font-size="19">PaperMC plugins · Fabric mods</text>
+    <text x="88" y="363" fill="#eae6f4" font-size="19">Iris shader packs</text>
+    <text x="88" y="395" fill="#a7b8b5" font-size="15">Version-aware engineering and validation</text>
+    <rect x="648" y="222" width="568" height="196" rx="16" fill="#211b31" stroke="#79648e"/>
+    <g transform="translate(674 247)" fill="none" stroke="#e4b7e6" stroke-width="3" stroke-linejoin="round">
+      <path d="M0 0h25l13 13v32H0Z M25 0v13h13 M9 24h20 M9 33h20"/>
+    </g>
+    <text x="734" y="277" fill="#efc8f0" font-size="21" font-weight="700">Documents &amp; study sheets</text>
+    <text x="674" y="328" fill="#eae6f4" font-size="19">Thai DOCX / PDF documents</text>
+    <text x="674" y="363" fill="#eae6f4" font-size="19">Black-and-white grid cram sheets</text>
+    <text x="674" y="395" fill="#bdb0cb" font-size="15">Print-ready layouts and rendered checks</text>
+  </g>
+</svg>

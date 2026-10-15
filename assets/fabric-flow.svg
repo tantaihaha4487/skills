@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="320" viewBox="0 0 1100 320" role="img" aria-labelledby="title desc">
+<title id="title">Fabric Mod Development workflow</title>
+<desc id="desc">Illustrative workflow: Resolve: Minecraft, mappings, API; Implement: Registries, callbacks, packets; Validate: Build and relevant game paths. Example: add a configurable item with state owned by the logical server.</desc>
+<rect x="1" y="1" width="1098" height="318" rx="20" fill="#1c192b" stroke="#443951"/>
+<g font-family="DejaVu Sans, sans-serif">
+<text x="32" y="34" fill="#a4cfff" font-size="11" font-weight="700" letter-spacing="2">EXACT VERSIONS. CLEAR SIDES.</text>
+<text x="32" y="77" fill="#faf7ff" font-size="29" font-weight="700">Fabric Mod Development</text>
+<text x="1046" y="77" text-anchor="end" fill="#a4cfff" font-size="42" font-weight="700" opacity=".28">02</text>
+<g transform="translate(37 135)" fill="none" stroke="#a4cfff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"><path d="m34 3 29 15-29 15L5 18Zm-29 15v30l29 15 29-15V18M34 33v30"/></g>
+<rect x="144" y="116" width="286" height="106" rx="12" fill="#262236" stroke="#4a405a"/>
+<circle cx="168" cy="141" r="10" fill="#a4cfff"/>
+<text x="168" y="145" text-anchor="middle" fill="#1c192b" font-size="11" font-weight="700">1</text>
+<text x="162" y="173" fill="#a4cfff" font-size="20" font-weight="700">Resolve</text>
+<text x="162" y="199" fill="#d0c9dd" font-size="13">Minecraft, mappings, API</text>
+<path d="M436 168h12m-4-4 4 4-4 4" fill="none" stroke="#a4cfff" stroke-width="2"/>
+<rect x="454" y="116" width="286" height="106" rx="12" fill="#262236" stroke="#4a405a"/>
+<circle cx="478" cy="141" r="10" fill="#a4cfff"/>
+<text x="478" y="145" text-anchor="middle" fill="#1c192b" font-size="11" font-weight="700">2</text>
+<text x="472" y="173" fill="#a4cfff" font-size="20" font-weight="700">Implement</text>
+<text x="472" y="199" fill="#d0c9dd" font-size="13">Registries, callbacks, packets</text>
+<path d="M746 168h12m-4-4 4 4-4 4" fill="none" stroke="#a4cfff" stroke-width="2"/>
+<rect x="764" y="116" width="286" height="106" rx="12" fill="#262236" stroke="#4a405a"/>
+<circle cx="788" cy="141" r="10" fill="#a4cfff"/>
+<text x="788" y="145" text-anchor="middle" fill="#1c192b" font-size="11" font-weight="700">3</text>
+<text x="782" y="173" fill="#a4cfff" font-size="20" font-weight="700">Validate</text>
+<text x="782" y="199" fill="#d0c9dd" font-size="13">Build and relevant game paths</text>
+<path d="M32 247h1036" stroke="#443951"/>
+<text x="32" y="282" fill="#d0c9dd" font-size="15">Example: add a configurable item with state owned by the logical server.</text>
+</g></svg>
