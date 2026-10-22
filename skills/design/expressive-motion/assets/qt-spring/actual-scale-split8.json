@@ -1,0 +1,58 @@
+{
+    "notes": [
+        "values[0] is the value before the first driver step",
+        "the first 16ms driver step may only start the QML animation; this is a lifecycle observation, not a recurrence sample",
+        "each delta sequence has the same total elapsed time only when its sums match; no web equivalence is inferred from this probe"
+    ],
+    "probe": "source QML SpringAnimation under advanceAnimation()",
+    "qt": "6.12.0",
+    "scenarios": [
+        {
+            "damping": 0.24,
+            "deltas_ms": [
+                8,
+                8,
+                8,
+                8,
+                8,
+                8,
+                8,
+                8,
+                8,
+                8,
+                8,
+                8,
+                8,
+                8,
+                8,
+                8
+            ],
+            "epsilon": 0.002,
+            "from": 1,
+            "name": "split8",
+            "settled": 0.95,
+            "spring": 7,
+            "target": 0.95,
+            "values": [
+                1,
+                1,
+                0.9944,
+                0.9944,
+                0.9851711999999999,
+                0.9851711999999999,
+                0.9742181375999999,
+                0.9742181375999999,
+                0.9631813787647999,
+                0.9631813787647999,
+                0.9533171276283904,
+                0.9533171276283904,
+                0.9454487784703394,
+                0.9454487784703394,
+                0.9399785699215426,
+                0.9399785699215426,
+                0.9369436115932442
+            ]
+        }
+    ]
+}
+

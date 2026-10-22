@@ -1,0 +1,13 @@
+{
+  "reference": "measured reference implementation",
+  "sha256": {
+    "backdrop_blur.frag": "4942781c604c9dd618970a1b1a6395659ded9e2e26a4a0f41db235e6214f2d0a",
+    "backdrop_composite.frag": "47d11deb16251a2d207194a355fb3fd5ccbdc4b480872179a40914edac5ce8ff",
+    "liquid_backdrop.frag": "c76e015e44048f37266b5dbc47edb6cf6a63f1b8ba57663ce29314ee501fcb35",
+    "rounded_image.frag": "474e2232b7aef9269f1b4c8526340ff0697a7bc1075485cbfd6a631beb5621b1",
+    "shape_mask.frag": "7477474d7be3083c801a124e2f65dff67a7b4e54b0d6728f93a17a0d2391f74f",
+    "spectrum_bars.frag": "6f9a23bfd3d07a8b154bea7c82c7a2f96ac7d36498578bd6a7e12d20fcb972c8",
+    "spectrum_halo.frag": "0e0285581ddb40349e628a80803bcab9fd26afa02f33fbf4c5ac90711c595ad8"
+  },
+  "adaptation": "Source GLSL retained; web modules adapt interface/coordinates to WebGL2. Supplied uniforms/textures are caller-owned inputs."
+}

@@ -1,0 +1,102 @@
+{
+  "source_parameters": {
+    "spring": 7,
+    "damping": 0.24,
+    "epsilon": 0.002
+  },
+  "qt": {
+    "version": "6.12.0",
+    "driver_step_ms": 16
+  },
+  "forward": {
+    "damping": 0.24,
+    "epsilon": 0.002,
+    "forward": [
+      0,
+      0,
+      0.296576,
+      0.736372424704,
+      1.0910244305932124,
+      1.2611277681351147,
+      1.159758474604759,
+      0.9568134985710082,
+      0.9964858286371068,
+      1.0068858830340217,
+      1.0014123749590564,
+      1,
+      1
+    ],
+    "scenario": "forward",
+    "settledForward": 1,
+    "spring": 7,
+    "timesMs": [
+      0,
+      16,
+      32,
+      64,
+      96,
+      128,
+      192,
+      256,
+      384,
+      512,
+      768,
+      1024,
+      1536
+    ]
+  },
+  "reversal": {
+    "damping": 0.24,
+    "epsilon": 0.002,
+    "reversal": [
+      1.2611277681351147,
+      1.1660128246941164,
+      0.9631320313132167,
+      0.42338604990075884,
+      -0.04997599066599684,
+      -0.3043142695641066,
+      -0.22493307764990594,
+      0.03967233006609884,
+      0.010400054396914889,
+      -0.010568611057320678,
+      -0.0018380722837532907,
+      0,
+      0
+    ],
+    "reversalOrigin": 1.2611277681351147,
+    "scenario": "reversal",
+    "settledReversal": 0,
+    "spring": 7,
+    "timesMs": [
+      0,
+      16,
+      32,
+      64,
+      96,
+      128,
+      192,
+      256,
+      384,
+      512,
+      768,
+      1024,
+      1536
+    ]
+  },
+  "repeat_consistency": {
+    "repeat_count_per_scenario": 3,
+    "max_abs_difference_forward": 0,
+    "max_abs_difference_reversal": 0.0,
+    "settled_forward": [
+      1,
+      1,
+      1
+    ],
+    "settled_reversal": [
+      0,
+      0,
+      0
+    ]
+  },
+  "boundary": "Isolated Qt SpringAnimation; first forward16ms readback is0 although the recurrence predicts.112. Keep startup mismatch explicit; do not shift the golden."
+}

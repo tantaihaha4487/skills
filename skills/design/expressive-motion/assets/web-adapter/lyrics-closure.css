@@ -1,0 +1,137 @@
+.lyrics-closure {
+  box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  color: #fff;
+  background: transparent;
+  font-family: 'Google Sans Flex', sans-serif;
+}
+
+.lyrics-closure__list {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+.lyrics-closure--panel .lyrics-closure__list {
+  padding: 18px 24px;
+  gap: 22px;
+}
+
+.lyrics-closure--immersive .lyrics-closure__list {
+  padding: 30px 8px;
+  gap: 26px;
+}
+
+.lyrics-closure__line {
+  box-sizing: border-box;
+  position: relative;
+  transform-origin: left center;
+  flex: 0 0 auto;
+  width: 100%;
+  min-height: 28px;
+}
+
+.lyrics-closure--immersive .lyrics-closure__line {
+  min-height: 82px;
+  padding: 8px 0;
+}
+
+.lyrics-closure__text {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: default;
+  transform: scale(var(--line-scale, 1));
+  transform-origin: left top;
+  opacity: var(--line-opacity, 1);
+  /* Scalar motion is advanced by the controller, using source equations. */
+  transition: none;
+}
+
+.lyrics-closure--panel .lyrics-closure__text {
+  min-height: 28px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 28px;
+  white-space: pre-wrap;
+}
+
+.lyrics-closure--immersive .lyrics-closure__text {
+  min-height: 54px;
+  padding: 14px 24px;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 26px;
+  white-space: pre-wrap;
+  transform: none;
+}
+
+.lyrics-closure--panel .lyrics-closure__text:disabled {
+  color: inherit;
+}
+
+.lyrics-closure--immersive .lyrics-closure__text:not(:disabled) {
+  cursor: pointer;
+}
+
+.lyrics-closure__highlight {
+  position: absolute;
+  inset: 0;
+  border-radius: 32px;
+  background: rgb(255 255 255 / 0);
+  transition: none;
+}
+
+.lyrics-closure--immersive [data-active='true'] .lyrics-closure__highlight {
+  background: rgb(255 255 255 / 7%);
+}
+
+.lyrics-closure[data-no-shapes='true'] .lyrics-closure__highlight {
+  border-radius: 20px;
+}
+
+.lyrics-closure__loading,
+.lyrics-closure__empty {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  color: rgb(255 255 255 / 70%);
+  white-space: nowrap;
+}
+
+.lyrics-closure[data-state='ready'] .lyrics-closure__loading,
+.lyrics-closure[data-state='ready'] .lyrics-closure__empty,
+.lyrics-closure[data-state='empty'] .lyrics-closure__loading,
+.lyrics-closure[data-state='loading'] .lyrics-closure__empty {
+  display: none;
+}
+
+.lyrics-closure[data-state='loading'] .lyrics-closure__list,
+.lyrics-closure[data-state='empty'] .lyrics-closure__list {
+  visibility: hidden;
+}
+
+
+.lyrics-closure__flash {position:absolute;inset:0;border-radius:20px;pointer-events:none;background:transparent;}
+
+/* Qt footer contributes to contentHeight, independently of the list margins.
+   Cancel the flex gap before it: QML spacing applies between delegates only. */
+.lyrics-closure__list::after {content:attr(data-footer);box-sizing:border-box;display:block;flex:0 0 33px;height:33px;margin-top:-22px;padding-top:18px;font-size:12px;line-height:15px;white-space:nowrap;color:#b3b3b3;}
+.lyrics-closure--immersive .lyrics-closure__list::after {flex-basis:61px;height:61px;margin-top:-26px;padding-top:46px;padding-left:18px;}
