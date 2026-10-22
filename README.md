@@ -2,7 +2,7 @@
 
 **English** · [ภาษาไทย](README.th.md)
 
-Reusable agent skills for Minecraft development, Thai documents, and print-ready PDFs. Small, composable workflows grounded in each task's actual constraints.
+Reusable agent skills for Minecraft development, expressive UI design, Thai documents, and print-ready PDFs. Small, composable workflows grounded in each task's actual constraints.
 
 ![Agent Skills: PaperMC plugins, Fabric mods, Iris shaders, Thai documents, and print-ready PDFs](assets/skills-banner.svg)
 
@@ -31,6 +31,7 @@ npx skills@latest add tantaihaha4487/skills --skill fabric-mod-development
 npx skills@latest add tantaihaha4487/skills --skill iris-shader-development
 npx skills@latest add tantaihaha4487/skills --skill thai-docs
 npx skills@latest add tantaihaha4487/skills --skill bw-grid-pdf
+npx skills@latest add tantaihaha4487/skills --skill expressive-motion
 ```
 
 </details>
@@ -39,11 +40,11 @@ Use `--global` with `--agent codex` to install them in your user-level Codex ski
 
 ## Find your workflow
 
-| Build & develop | Write & study |
-| --- | --- |
-| [PaperMC plugins](#papermc-plugin-development) | [Thai documents](#thai-documentation) |
-| [Fabric mods](#fabric-mod-development) | [B/W grid cram sheets](#bw-grid-cram-sheet-pdf) |
-| [Iris shaders](#iris-shader-development) | |
+| Build & develop | Write & study | Design |
+| --- | --- | --- |
+| [PaperMC plugins](#papermc-plugin-development) | [Thai documents](#thai-documentation) | [Expressive motion UI](#expressive-motion) |
+| [Fabric mods](#fabric-mod-development) | [B/W grid cram sheets](#bw-grid-cram-sheet-pdf) | |
+| [Iris shaders](#iris-shader-development) | | |
 
 The diagrams below illustrate each workflow. Example prompts are starting points; actual output and validation depend on your project and available tools.
 
@@ -97,9 +98,27 @@ The diagrams below illustrate each workflow. Example prompts are starting points
 
 > Turn these exam notes into a black-and-white landscape cram sheet. Show a layout mockup first, then export a readable grid PDF and inspect every page.
 
+### Expressive Motion
+
+![Write a parity contract → reproduce shapes, springs, and real states → prove with tests, runtime, and screenshots.](assets/expressive-motion-flow.svg)
+
+[`expressive-motion`](skills/design/expressive-motion/SKILL.md) applies a measured Material 3 Expressive style to any UI platform: exact rounding, size, and type tokens; layered color roles; a 37-shape catalogue; Qt-measured springs; scalloped and squiggle cover edges; shape reveals; and a settings policy where reduced motion stills ambient loops but keeps interaction feedback. It ships web and QML adapters, a token exporter, and offline tests, and asks for a short parity contract before touching an interface.
+
+**Built with it:**
+
+| [ทีละบรรทัด (teelabandat)](https://teelabandat.vercel.app/) · Thai coding lessons | Portfolio · [temporary preview](https://vaulted-canoe-c2v7k.ship.place/portfolio.html) |
+| --- | --- |
+| ![ทีละบรรทัด home page: a cookie-shaped mascot frame, a pill-highlighted Thai headline, and a line-by-line code card](assets/expressive-motion/teelabandat-home.webp) | ![Portfolio home page: a morphing cookie shape behind a cut-out portrait, orbiting shape buttons, and a dotted shape ring](assets/expressive-motion/portfolio.webp) |
+
+ทีละบรรทัด uses the style with its own purple brand palette; the portfolio is a single-file page built from the skill's web adapters. The portfolio preview link is temporary and expires on 23 October 2026.
+
+**Try it:**
+
+> Rebuild this landing page in the expressive-motion style. Write the parity contract first, use the exported motion tokens and measured springs, and verify reduced-motion and performance modes in the browser.
+
 ## What to expect
 
-The engineering skills inspect the repository and exact dependencies before making changes. Document skills follow the requested format and check rendered output. Each workflow reports what was verified and what still needs testing.
+The engineering skills inspect the repository and exact dependencies before making changes. Document skills follow the requested format and check rendered output. The design skill records every platform adaptation and reports structural, runtime, and visual evidence separately. Each workflow reports what was verified and what still needs testing.
 
 ## License
 
