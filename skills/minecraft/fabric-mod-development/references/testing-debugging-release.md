@@ -1,6 +1,6 @@
 # Testing, Debugging, and Release
 
-Use this reference to select evidence proportional to a change, diagnose runtime failures, and prepare a production artifact.
+Use to choose evidence proportional to changes, diagnose runtime failures, and prepare production artifacts.
 
 ## Validation Layers
 
@@ -14,7 +14,7 @@ Use this reference to select evidence proportional to a change, diagnose runtime
 | Client/integrated run | Client initialization and both logical sides | Can hide dedicated-server-only class-loading failures |
 | Full build/JAR inspection | Packaging, remapping, expanded metadata, resources | Does not execute the artifact's behavior |
 
-Use Fabric Loader JUnit rather than plain JUnit when tests load Minecraft classes affected by the Loader/Mixin runtime. Bootstrap required vanilla registries exactly as the target test docs specify. Keep pure logic independent enough for ordinary unit tests where practical.
+Use Fabric Loader JUnit instead of plain JUnit for tests loading Minecraft classes affected by the Loader/Mixin runtime. Bootstrap required vanilla registries per target test docs. Keep pure logic independent for ordinary unit tests where practical.
 
 ## Debugging Router
 
@@ -33,9 +33,9 @@ Use Fabric Loader JUnit rather than plain JUnit when tests load Minecraft classe
 | State resets after restart | Missing codec field, wrong storage scope, or missing `setDirty()` |
 | Concurrent modification/wrong-thread exception | Callback thread assumption or unsafely shared state |
 
-Use breakpoints and targeted debug logging. Include the mod ID in logger names/messages and keep noisy diagnostics at debug level. Remove temporary logs after the hypothesis is resolved.
+Use breakpoints and targeted debug logging. Include the mod ID in logger names/messages; keep noisy diagnostics at debug level. Remove temporary logs after resolving the hypothesis.
 
-Resource reload can refresh assets/data in supported contexts, but Java, Mixin, registry, and many initialization changes require a restart. Do not mistake a stale run for a failed source fix.
+Resource reload can refresh assets/data in supported contexts, but Java, Mixin, registry, and many initialization changes require restart. Do not mistake a stale run for a failed source fix.
 
 ## Release Gate
 

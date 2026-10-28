@@ -1,6 +1,6 @@
 {
   "i": "website-direction-v2", "t": "Shape the website before we build",
-  "c": "Choose the decisions that change the design and implementation. The agent will use your saved answers as the working brief.",
+  "c": "Choose decisions that change design and implementation. The agent will use your saved answers as the working brief.",
   "q": [
     {
       "i": "visual-tone", "p": "What should the site feel like?", "w": "This drives typography, color, spacing, imagery, and motion.", "t": "s", "r": true, "a": true,

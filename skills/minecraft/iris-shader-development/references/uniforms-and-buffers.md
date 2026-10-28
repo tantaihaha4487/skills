@@ -12,15 +12,17 @@ Fog/depth: `near`, `far`, `fogColor`, `fogDensity`, `fogStart`, `fogEnd`, `fogMo
 
 Matrices: `gbufferModelView`, `gbufferModelViewInverse`, `gbufferProjection`, `gbufferProjectionInverse`, `shadowModelView`, `shadowModelViewInverse`, `shadowProjection`, `shadowProjectionInverse`, and previous-frame model/projection matrices.
 
-Lighting/material: `sunPosition`, `moonPosition`, `shadowLightPosition`, `eyeBrightness`, `eyeBrightnessSmooth`, `heldBlockLightValue`, `entityColor`, `alphaTestRef`, `chunkOffset`, `renderStage`.
+Lighting/material: `sunPosition`, `moonPosition`, `shadowLightPosition`, `eyeBrightness`, `eyeBrightnessSmooth`, `heldBlockLightValue`, `entityColor`, `alphaTestRef`, `renderStage`.
 
-Check the current Iris uniform reference before relying on a type, range, or Iris-exclusive tag.
+`chunkOffset` works only in the core profile on Minecraft 1.17+, is zero in compatibility, and remains Iris's name after vanilla renamed it to `modelOffset` in 1.21.2; check the current reference.
+
+Check current Iris docs for uniform type, range, and Iris-exclusive tags.
 
 ## Built-in buffers
 
-Typical samplers include `colortex0` through `colortexN`, `depthtex0`, `depthtex1`, `shadowtex0`, `shadowtex1`, `shadowcolor0`, and `noisetex`. Color buffers are display-resolution by default; depth and shadow formats/resolution can vary. Iris also supports custom textures, images, and SSBOs.
+Samplers include `colortex0` through `colortexN`, `depthtex0`, `depthtex1`, `shadowtex0`, `shadowtex1`, `shadowcolor0`, and `noisetex`; color buffers default to display resolution, while depth/shadow formats and resolution vary. Iris also supports custom textures, images, and SSBOs.
 
-Declare the sampler you read and explicitly declare outputs. For modern packs prefer:
+Declare read samplers and explicit outputs; modern packs should prefer:
 
 ```glsl
 /* RENDERTARGETS: 0,3 */
@@ -28,8 +30,8 @@ layout(location = 0) out vec4 sceneColor;
 layout(location = 1) out vec4 auxiliary;
 ```
 
-`DRAWBUFFERS` is the legacy form and cannot address higher buffer indices. Never leave outputs implicit: binding unintended buffers can overwrite data and cost performance.
+Legacy `DRAWBUFFERS` cannot address higher indices. Never leave outputs implicit: unintended bindings can overwrite data and cost performance.
 
 ## Coordinate and color cautions
 
-Confirm whether a calculation is in model, player, view, clip, screen, or world space. Treat depth as non-linear unless linearizing it deliberately. Preserve alpha semantics for cutout/translucent programs and document whether colors are linear or display encoded.
+Confirm model/player/view/clip/screen/world space. Treat depth as non-linear unless deliberately linearized. Preserve alpha in cutout/translucent programs and document linear/display-encoded colors.

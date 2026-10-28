@@ -1,6 +1,6 @@
 # Networking and Synchronization
 
-Use this reference whenever behavior crosses logical sides or a client needs server-owned state.
+Use when behavior crosses logical sides or clients need server-owned state.
 
 ## Design the Contract First
 
@@ -23,7 +23,7 @@ Exact classes and method names vary by Minecraft/Fabric API version. Verify the 
 1. Define a small immutable custom payload and its identifier/type.
 2. Define a stream codec with identical field order and bounds on both ends.
 3. Register the payload type in common initialization so both physical environments recognize it.
-4. Register the receiver in the entrypoint for the physical environment that receives it.
+4. Register server receivers in common initialization; register client receivers in client initialization.
 5. Validate before mutation, then execute game-state changes on the documented game thread.
 6. Send only to relevant players, commonly those tracking the entity, chunk, or position.
 

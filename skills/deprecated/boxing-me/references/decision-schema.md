@@ -1,6 +1,6 @@
 # Decision specification
 
-Use UTF-8 JSON. Prefer the compact authoring shape; the legacy verbose shape remains accepted. Both normalize to the same page model.
+Use UTF-8 JSON. Prefer compact authoring; legacy verbose remains accepted and normalizes to the same page model.
 
 ## Compact shape
 
@@ -39,13 +39,13 @@ Question keys:
 - `['any', condition, condition]`: require at least one child.
 - `['not', condition]`: invert one child.
 
-Reference only an earlier single- or multi-choice question and one of its option IDs. This ordering prevents cycles. A branch whose dependency is itself hidden remains hidden. Hidden answers stay in browser autosave but are excluded from validation, progress, review, recommendations, copied briefs, and saved responses.
+Reference only an earlier single- or multi-choice question and one of its option IDs. This prevents cycles. A hidden dependency keeps its branch hidden. Hidden answers remain in browser autosave but are excluded from validation, progress, review, recommendations, copied briefs, and saved responses.
 
 ## Legacy verbose fields
 
-The existing `id`, `locale`, `title`, `context`, and `questions` root fields remain valid. Questions may use `id`, `prompt`, `why`, `type`, `required`, `allow_other`, `min`, `max`, `options`, and `when`. Options may use `id`, `label`, `details`, `recommended`, and `recommendation_reason`. Use the same condition arrays for `when`.
+Legacy root fields (`id`, `locale`, `title`, `context`, `questions`) remain valid. Questions may use `id`, `prompt`, `why`, `type`, `required`, `allow_other`, `min`, `max`, `options`, `when`; options may use `id`, `label`, `details`, `recommended`, `recommendation_reason`. `when` uses the same condition arrays.
 
-Unknown verbose fields are ignored. Choice questions require at least two uniquely identified options. Recommended options require a reason. Multi-choice bounds must be non-negative, ordered, and no larger than the option count.
+Unknown verbose fields are ignored. Choice questions require at least two uniquely identified options. Recommended options require a reason. Multi-choice bounds must be non-negative, ordered, and at most the option count.
 
 ## Saved response
 

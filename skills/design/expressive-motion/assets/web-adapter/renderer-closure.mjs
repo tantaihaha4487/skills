@@ -1,3 +1,7 @@
+import {SOURCE_REVEAL_SHAPES} from './reveal-shapes.mjs';
+import {compileShader,uniformFields} from './shader-utils.mjs';
+export {SOURCE_REVEAL_SHAPES};
+
 // Independent WebGL2 adapter for source rounded_image.frag and
 // shape_mask.frag. Programs, geometry, and the texture owner persist across
 // frames. The caller supplies source shader text, uniforms, and optionally a
@@ -24,46 +28,42 @@ export function adaptSourceShader(source) {
   shader = shader.replace(/layout\(location\s*=\s*0\)\s+out\s+vec4\s+fragColor\s*;/,
                           'out vec4 fragColor;');
   shader = shader.replace(/layout\(std140,\s*binding\s*=\s*0\)\s+uniform\s+buf\s*\{([\s\S]*?)\};/,
-    (_match, fields) => fields.replace(/\/\/[^\n]*/g, '').split(';')
-      .map(field => field.trim())
-      .filter(Boolean)
-      .map(field => `uniform ${field};`)
-      .join('\n'));
+    (_match, fields) => uniformFields(fields));
   shader = shader.replace(/layout\(binding\s*=\s*1\)\s+uniform\s+sampler2D\s+source\s*;/,
                           'uniform sampler2D source;');
   return shader;
 }
 
-function compile(gl, kind, source) {
-  const shader = gl.createShader(kind);
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    const log = gl.getShaderInfoLog(shader);
-    gl.deleteShader(shader);
-    throw new Error(log || 'WebGL shader compilation failed');
-  }
-  return shader;
-}
-
 function programFor(gl, source) {
-  const vertex = compile(gl, gl.VERTEX_SHADER, VERTEX);
-  const fragment = compile(gl, gl.FRAGMENT_SHADER, adaptSourceShader(source));
-  const program = gl.createProgram();
-  gl.attachShader(program, vertex);
-  gl.attachShader(program, fragment);
-  gl.linkProgram(program);
-  // Shader objects are short-lived link inputs. The linked program remains
-  // owned by SourceRenderer until dispose(), rather than being rebuilt per
-  // animation frame.
-  gl.deleteShader(vertex);
-  gl.deleteShader(fragment);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    const log = gl.getProgramInfoLog(program);
-    gl.deleteProgram(program);
-    throw new Error(log || 'WebGL shader link failed');
+  const vertex = compileShader(gl, gl.VERTEX_SHADER, VERTEX, 'WebGL shader compilation failed');
+  let fragment;
+  try {
+    fragment = compileShader(gl, gl.FRAGMENT_SHADER, adaptSourceShader(source), 'WebGL shader compilation failed');
+  } catch (error) {
+    gl.deleteShader(vertex);
+    throw error;
   }
-  return program;
+  let program;
+  try {
+    program = gl.createProgram();
+    gl.attachShader(program, vertex);
+    gl.attachShader(program, fragment);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      const log = gl.getProgramInfoLog(program);
+      throw new Error(log || 'WebGL shader link failed');
+    }
+    return program;
+  } catch (error) {
+    if (program) gl.deleteProgram(program);
+    throw error;
+  } finally {
+    // Shader objects are short-lived link inputs. The linked program remains
+    // owned by SourceRenderer until dispose(), rather than being rebuilt per
+    // animation frame.
+    gl.deleteShader(vertex);
+    gl.deleteShader(fragment);
+  }
 }
 
 function sourceDimensions(source) {
@@ -132,9 +132,10 @@ function imageDataPixels(source, {flipY, premultiplyAlpha}) {
       const from = (sourceY * source.width + x) * 4;
       const to = (y * source.width + x) * 4;
       const alpha = source.data[from + 3];
-      pixels[to] = premultiplyAlpha ? Math.round(source.data[from] * alpha / 255) : source.data[from];
-      pixels[to + 1] = premultiplyAlpha ? Math.round(source.data[from + 1] * alpha / 255) : source.data[from + 1];
-      pixels[to + 2] = premultiplyAlpha ? Math.round(source.data[from + 2] * alpha / 255) : source.data[from + 2];
+      const factor = premultiplyAlpha ? alpha / 255 : 1;
+      pixels[to] = premultiplyAlpha ? Math.round(source.data[from] * factor) : source.data[from];
+      pixels[to + 1] = premultiplyAlpha ? Math.round(source.data[from + 1] * factor) : source.data[from + 1];
+      pixels[to + 2] = premultiplyAlpha ? Math.round(source.data[from + 2] * factor) : source.data[from + 2];
       pixels[to + 3] = alpha;
     }
   }
@@ -242,10 +243,16 @@ export class SourceRenderer {
   program(programKey, source) {
     const existing = this.programs.get(programKey);
     if (existing && existing.source === source) return existing;
-    if (existing) this.gl.deleteProgram(existing.program);
     const program = programFor(this.gl, source);
-    const position = this.gl.getAttribLocation(program, 'position');
+    let position;
+    try {
+      position = this.gl.getAttribLocation(program, 'position');
+    } catch (error) {
+      this.gl.deleteProgram(program);
+      throw error;
+    }
     const info = {program, source, position, locations: new Map()};
+    if (existing) this.gl.deleteProgram(existing.program);
     this.programs.set(programKey, info);
     this.stats.programCompiles++;
     return info;
@@ -407,21 +414,6 @@ export function createProgrammaticTexture(kind, width = 64, height = 48) {
 // Source shape-catalogue params values used by the reference shell's reveal picker. The
 // reveal shader clamps lobes to five in the reference shell; callers use
 // sourceRevealUniforms below so reach normalization stays source-derived.
-export const SOURCE_REVEAL_SHAPES = Object.freeze({
-  cookie9: [9, 0.09, 1, 0],
-  cookie6: [6, 0.1, 1, 0],
-  clover4: [4, 0.42, 0.55, 0],
-  clover8: [8, 0.28, 0.6, 0],
-  sunny: [8, 0.14, 2.2, 0],
-  verySunny: [8, 0.26, 2.6, 0],
-  softBurst: [10, 0.16, 1.5, 0],
-  burst: [12, 0.24, 2.8, 0],
-  flower: [8, 0.32, 0.45, 0],
-  puffy: [6, 0.18, 0.5, 0],
-  pentagon: [5, 0.12, 3, 0],
-  gem: [6, 0.08, 4, 0],
-});
-
 export function sourceRevealUniforms(shapeName, revealReach, spin, width = 320, height = 240) {
   const picked = SOURCE_REVEAL_SHAPES[shapeName];
   if (!picked) throw new Error(`Unknown source reveal shape: ${shapeName}`);

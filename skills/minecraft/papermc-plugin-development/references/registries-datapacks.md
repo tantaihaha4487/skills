@@ -2,7 +2,7 @@
 
 ## Load this reference when
 
-Use this file for keyed game data, registry lookups, custom registry entries, or datapack discovery. Registry mutation and bootstrap datapacks are experimental, early-lifecycle features.
+Use for keyed game data, registry lookups, custom registry entries, or datapack discovery. Registry mutation and bootstrap datapacks are experimental, early-lifecycle features.
 
 ## Registry reads
 

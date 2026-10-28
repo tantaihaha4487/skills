@@ -16,7 +16,7 @@ void main() {
 }
 ```
 
-For a new effect, first prove this pass loads, then change only the color expression. Keep the matching fullscreen vertex shader from the chosen template.
+For new effects, prove this pass loads before changing only the color expression; retain the chosen template's matching fullscreen vertex shader.
 
 ## Grayscale change
 
@@ -26,4 +26,4 @@ float gray = dot(color.rgb, vec3(1.0 / 3.0));
 color.rgb = vec3(gray);
 ```
 
-This is deliberately simple: use it as a load/compile smoke test before adding depth, temporal state, or multiple render targets.
+This pass is a load/compile smoke test before adding depth, temporal state, or multiple render targets.

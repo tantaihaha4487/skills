@@ -1,6 +1,6 @@
 # Entities
 
-Use this reference after identifying entity ownership, delayed work, persistence needs, and target-version API replacements.
+Use after identifying entity ownership, delayed work, persistence needs, and target-version API replacements.
 
 ## Use when
 

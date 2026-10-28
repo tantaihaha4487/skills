@@ -2,7 +2,7 @@
 
 ## Load this reference when
 
-Load this file before creating a plugin, changing module boundaries, adding dependencies, altering build logic, or choosing an output artifact. For lifecycle-only or descriptor-only work, load the narrower reference instead.
+Load before creating a plugin, changing module boundaries, adding dependencies, altering build logic, or choosing an output artifact. For lifecycle-only or descriptor-only work, load the narrower reference instead.
 
 ## Preserve the repository as the authority
 

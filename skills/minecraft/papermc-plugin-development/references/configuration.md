@@ -2,7 +2,7 @@
 
 ## Scope
 
-Use this reference for packaged defaults, files in the plugin data directory, validation,
+Use for packaged defaults, files in the plugin data directory, validation,
 persistence, custom serialization, and plugin-specific configuration reload.
 
 ## Separate three representations
@@ -24,7 +24,7 @@ explicitly directs these operations to run asynchronously.
 ## Load without losing known-good state
 
 `YamlConfiguration.loadConfiguration(file)` returns an empty configuration when the file is
-missing **or when reading fails**. Distinguish first-run creation from malformed or unreadable
+missing **or reading fails**. Distinguish first-run creation from malformed or unreadable
 input before accepting the result.
 
 Use this publication sequence:

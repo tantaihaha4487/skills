@@ -1,6 +1,6 @@
 # Extension Points and API Stability
 
-Use this reference when choosing between vanilla behavior, Fabric API, another dependency, an event, a Mixin, or a class tweaker/access widener.
+Use when choosing vanilla behavior, Fabric API, dependencies, events, Mixins, or class tweakers/access wideners.
 
 ## Decision Ladder
 
@@ -15,7 +15,7 @@ Prefer an event over a Mixin when both expose the required behavior. Events redu
 
 ## Registries and Initialization
 
-Registry entries normally use static holders plus an explicit `initialize`/`register` call from an entrypoint. The call makes the loading path visible even when registration occurs in static initializers.
+Registry entries normally use static holders plus an explicit `initialize`/`register` call from an entrypoint. This makes the loading path visible even when registration occurs in static initializers.
 
 Check companion obligations:
 

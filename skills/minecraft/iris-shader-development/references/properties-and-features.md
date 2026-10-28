@@ -15,16 +15,16 @@ profile.LOW = BLOOM false
 profile.HIGH = BLOOM true BLOOM_STRENGTH 0.8
 ```
 
-Shader option macros are injected into shader compilation; keep option names stable and do not confuse them with GLSL `#define` directives in this file.
+Shader options inject compile-time macros; keep option names stable; do not put GLSL `#define` here.
 
 ## Internal directives
 
 Useful directives include `iris.features.required`, `iris.features.optional`, `shadow.enabled`, `shadowTerrain`, `shadowEntities`, `particles.ordering`, `separateEntityDraws`, `program.enabled`, `size.buffer.*`, `scale`, `flip`, `blend`, `alphaTest`, and culling controls. Verify spelling and availability against current Iris docs.
 
-Require a feature only when the pack cannot work without it. Prefer optional features with a fallback for portability.
+Require features only when essential; prefer optional flags with fallbacks.
 
-Common feature flags include `COMPUTE_SHADERS`, `SSBO`, `CUSTOM_IMAGES`, `REVERSED_CULLING`, and `TESSELLATION_SHADERS`. Feature names and support vary by Iris release; do not hardcode a version claim without checking the current reference.
+Common flags include `COMPUTE_SHADERS`, `SSBO`, `CUSTOM_IMAGES`, `REVERSED_CULLING`, and `TESSELLATION_SHADERS`; names/support vary by Iris release, so check the current reference before claims.
 
 ## Custom data
 
-Use custom uniforms for CPU-derived values, custom textures/images for extra textures, and SSBOs only when their complexity and hardware boundary are justified. Document required flags, buffer formats, resolution scaling, and fallback behavior near the relevant option.
+Use custom uniforms for CPU-derived values, custom textures/images for extra textures, and SSBOs only when complexity and hardware boundaries justify them. Document required flags, buffer formats, resolution scaling, and fallback behavior near the relevant option.

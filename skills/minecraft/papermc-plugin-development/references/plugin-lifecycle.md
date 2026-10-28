@@ -1,12 +1,8 @@
 # Plugin lifecycle and owned resources
 
-## Contents
-
-[Scope](#load-this-reference-when) · [Phases](#model-lifecycle-before-writing-code) · [Ownership](#ownership-rules) · [Services](#services-and-integrations) · [Configuration](#configuration-and-resources) · [Lifecycle API](#lifecycle-api) · [Traps](#traps) · [Evidence](#required-evidence)
-
 ## Load this reference when
 
-Load this file for entrypoint changes, initialization, services, configuration ownership, schedulers, background work, reload behavior, or shutdown logic.
+Load for entrypoint changes, initialization, services, configuration ownership, schedulers, background work, reload behavior, or shutdown logic.
 
 ## Model lifecycle before writing code
 
@@ -19,11 +15,11 @@ Load this file for entrypoint changes, initialization, services, configuration o
 | Running callbacks | Perform work in the callback's documented execution context | Main-thread safety for async callbacks or global-thread safety on Folia |
 | onDisable | Stop intake, cancel or signal work, flush state, close resources, and detach external hooks | Complete initialization or automatic cleanup of plugin-created resources |
 
-Paper constructs the JavaPlugin. Never instantiate it manually. Keep only the actual entrypoint subclassed from JavaPlugin.
+Paper constructs the JavaPlugin; never instantiate it manually. Only the actual entrypoint subclasses JavaPlugin.
 
 ## Ownership rules
 
-The component that creates a resource must have an explicit shutdown path for it. Track:
+Each resource's creator must have an explicit shutdown path. Track:
 
 - scheduler handles and lifecycle registrations;
 - plugin-created threads and executor services;
@@ -35,17 +31,17 @@ The component that creates a resource must have an explicit shutdown path for it
 
 Make shutdown idempotent and safe after partial enable failure. Do not dereference fields merely because normal startup assigns them.
 
-Use the plugin logger. Prefer current plugin metadata APIs over deprecated description accessors.
+Use the plugin logger; prefer current plugin metadata APIs over deprecated description accessors.
 
 ## Services and integrations
 
-Use ServicesManager when plugins exchange an interface implementation and the repository does not already define another integration mechanism.
+Use ServicesManager when plugins exchange an interface implementation and the repository lacks another integration mechanism.
 
 - Register the provider with its owning plugin and priority.
-- Load once and handle a null result.
-- Do not check isProvidedFor and then call load; the provider can change between those calls.
+- Load once; handle null results.
+- Do not check isProvidedFor before load; the provider can change between calls.
 - Represent required versus optional provider plugins in the descriptor.
-- Release consumers and provider-owned resources during shutdown even when Paper also removes plugin registrations.
+- Release consumers and provider-owned resources during shutdown even when Paper removes plugin registrations.
 
 Avoid static plugin singletons as a substitute for ownership. If legacy code exposes one, do not expand its role without a repository-wide reason.
 
@@ -69,13 +65,13 @@ For a plugin-specific reload:
 5. Dispose replaced resources.
 6. Keep the previous state active on failure.
 
-Do not advertise support for server /reload. Paper plugins specifically do not support it, and ordinary plugins should not rely on it as a lifecycle test.
+Do not advertise server /reload support. Paper plugins do not support it; ordinary plugins should not use it as a lifecycle test.
 
 ## Lifecycle API
 
 Use Paper's Lifecycle API when the API being registered is lifecycle-aware, especially commands and registries. A handler registered through the plugin lifecycle manager follows plugin lifetime. Bootstrap registration is appropriate only for a Paper-plugin entrypoint that genuinely needs the earlier phase.
 
-Lifecycle event monitors observe only; do not mutate from a monitor.
+Lifecycle event monitors only observe; do not mutate from one.
 
 ## Traps
 

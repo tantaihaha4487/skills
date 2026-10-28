@@ -2,13 +2,10 @@
 // keeps an already decoded cover in a temporary Item until the destination
 // ArtworkImage is ready.  This browser adapter does the same with a fixed
 // overlay, a moving target rect and the measured fixed-step spring.
+import {advanceSpring,springStep} from './spring.mjs';
 
-function step(state, target) {
-  const velocity = state.velocity * (1 - 0.27) + (target - state.position) * 3.4;
-  const position = state.position + velocity * 0.016;
-  const settled = Math.abs(target - position) <= 0.002 && Math.abs(velocity) <= 0.002;
-  return settled ? { position: target, velocity: 0, settled: true } : { position, velocity, settled: false };
-}
+const HERO_SPRING = {stiffness:3.4,damping:.27,epsilon:.002,stepMs:16};
+const HERO_ADVANCE_OPTIONS = {maxFrameMs: Number.MAX_VALUE};
 
 export class HeroFlight {
   constructor({
@@ -106,16 +103,11 @@ export class HeroFlight {
       this.frame = null;
       if (this.disposed || !this.overlay) return;
       this.measureDestination();
-      if (this.lastTimestamp === null) this.accumulator = 16;
-      else this.accumulator += Math.min(200, Math.max(0, timestamp - this.lastTimestamp));
+      const milliseconds = this.lastTimestamp === null
+        ? 16
+        : Math.min(200, Math.max(0, timestamp - this.lastTimestamp));
       this.lastTimestamp = timestamp;
-      while (this.accumulator >= 16) {
-        const next = step({ position: this.position, velocity: this.velocity }, 1);
-        this.position = next.position;
-        this.velocity = next.velocity;
-        this.accumulator -= 16;
-        if (next.settled) break;
-      }
+      this.integrate(milliseconds);
       this.render();
       if (this.position === 1 && this.velocity === 0 && this.to && this.destinationReady()) this.finish();
       else this.frame = requestAnimationFrame(tick);
@@ -123,16 +115,22 @@ export class HeroFlight {
     this.frame = requestAnimationFrame(tick);
   }
 
+  integrate(milliseconds) {
+    const next = advanceSpring(
+      { position: this.position, velocity: this.velocity, accumulator: this.accumulator },
+      1,
+      milliseconds,
+      HERO_SPRING,
+      HERO_ADVANCE_OPTIONS,
+    );
+    this.position = next.position;
+    this.velocity = next.velocity;
+    this.accumulator = next.accumulator;
+  }
+
   advance(milliseconds) {
     if (!this.overlay || this.disposed || this.performance) return;
-    this.accumulator += Math.max(0, milliseconds);
-    while (this.accumulator >= 16) {
-      const next = step({ position: this.position, velocity: this.velocity }, 1);
-      this.position = next.position;
-      this.velocity = next.velocity;
-      this.accumulator -= 16;
-      if (next.settled) break;
-    }
+    this.integrate(Math.max(0, milliseconds));
     this.render();
     if (this.position === 1 && this.velocity === 0 && this.to && this.destinationReady()) this.finish();
   }
@@ -196,7 +194,7 @@ export function heroSpringSamples(steps = 160) {
   let state = { position: 0, velocity: 0 };
   const samples = [{ t_ms: 0, position: 0, velocity: 0 }];
   for (let index = 1; index <= steps; index += 1) {
-    state = step(state, 1);
+    state = springStep(state, 1, HERO_SPRING);
     samples.push({ t_ms: index * 16, position: state.position, velocity: state.velocity });
     if (state.settled) break;
   }

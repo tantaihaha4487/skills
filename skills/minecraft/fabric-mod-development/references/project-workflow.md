@@ -1,10 +1,10 @@
 # Project and Build Workflow
 
-Use this reference when creating or restructuring a project, changing Gradle or metadata, generating resources, or inspecting an artifact.
+Use when creating/restructuring projects, changing Gradle/metadata, generating resources, or inspecting artifacts.
 
 ## Establish the Build Contract
 
-Read these as one contract rather than in isolation:
+Read these as one contract:
 
 - Gradle wrapper and settings.
 - Root and included build scripts.
@@ -14,7 +14,7 @@ Read these as one contract rather than in isolation:
 - Loader, Fabric API, Minecraft, mappings, and mod dependencies.
 - `fabric.mod.json` version placeholders and Gradle resource expansion.
 
-Use the wrapper (`./gradlew`) so the repository-selected Gradle version runs. Ask Gradle for tasks or dependencies rather than guessing custom task names.
+Run the repository-selected Gradle version via the wrapper (`./gradlew`). Ask Gradle for tasks/dependencies instead of guessing task names.
 
 Do not add repositories casually. Loom supplies the standard Minecraft/Fabric/Mojang and central dependency sources needed by ordinary projects; additional repositories should correspond to a real dependency and existing policy.
 
@@ -41,7 +41,7 @@ The plugin and tasks are version-sensitive:
 | 26.1 and newer | `net.fabricmc.fabric-loom` | Minecraft official names; no mappings dependency | `jar`/`build` |
 | Legacy projects | `fabric-loom` | Inspect project | Inspect project |
 
-This table is a routing rule, not a reason to rewrite a working legacy build during an unrelated change.
+This is a routing table; do not rewrite a working legacy build during unrelated changes.
 
 ## Data Generation
 

@@ -1,10 +1,10 @@
 # Best Practices and Failure Prevention
 
-Use this reference as the final design and diff review for changes that cross multiple Fabric systems.
+Use for final design/diff review of changes crossing Fabric systems.
 
 ## Architecture
 
-- Make entrypoints establish registrations; avoid expensive work or assumptions that resources and other mods have completed initialization.
+- Make entrypoints establish registrations; avoid expensive work or assuming resources and other mods are initialized.
 - Use explicit initialization calls so registry-holder reachability is visible.
 - Scope state to its owner and lifecycle; clean up caches on disconnect, unload, reload, or dimension changes.
 - Keep common APIs free of client types, including signatures and static initializers.
@@ -22,7 +22,7 @@ Use this reference as the final design and diff review for changes that cross mu
 ## Performance and Threads
 
 - Know the documented callback thread. Schedule game-state mutations to the correct server/client thread when necessary.
-- Protect truly shared state with an appropriate lock, concurrent structure, immutable snapshot, or copy-on-write strategy; do not add synchronization blindly to game-thread-only state.
+- Protect truly shared state with an appropriate lock, concurrent structure, immutable snapshot, or copy-on-write; do not synchronize game-thread-only state blindly.
 - Avoid synchronous disk/network I/O in ticks, render loops, and packet handlers.
 - Avoid per-tick/per-frame allocations, full-registry scans, global broadcasts, and repeated resource parsing.
 - Bound caches, packet collections, recursion guards, and queues; clear them on lifecycle end.

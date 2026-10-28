@@ -4,7 +4,7 @@
 
 Use current Iris documentation first:
 
-- https://shaders.properties/current/
+- https://shaders.properties/current/reference/overview/
 - https://irisshaders.dev/
 - https://github.com/IrisShaders/ShaderDoc
 
@@ -21,14 +21,14 @@ Use Iris examples for structure and idioms:
 
 ## Version discipline
 
-Before implementation, record Minecraft, loader, Iris, Sodium, GPU/OpenGL, and relevant rendering mods. Iris currently documents Fabric support from 1.16.5+ and NeoForge support from 1.21.1+, with Forge unsupported; verify these statements against the current site before publishing a compatibility table.
+Record Minecraft, loader, Iris, Sodium, GPU/OpenGL, and rendering-mod versions before implementation. Iris documents Fabric 1.16.5+ and NeoForge 1.21.1+, with Forge unsupported; recheck the current site before publishing compatibility claims.
 
-Iris ships with or integrates with Sodium. Rendering-mod interactions are not universal: Nvidium disables itself with shaders, Distant Horizons and Voxy need explicit pack support, Canvas/Vulkan/OptiFine are incompatible, and Indium requirements depend on the Minecraft/Sodium version. Test the actual target matrix.
+Iris integrates with Sodium. Test target matrix: Nvidium disables with shaders; Distant Horizons/Voxy need explicit pack support; Canvas/Vulkan/OptiFine are incompatible; Indium depends on Minecraft/Sodium version.
 
 ## Development setup
 
-A plain text editor works. VS Code can use GLSL syntax highlighting and the `vscode-mcshader` language server for Minecraft-specific linting/includes, but availability and platform support vary. A known-good Base-330 pack is a better baseline than inventing an empty pack.
+A plain editor works; VS Code may add GLSL highlighting and Minecraft lint/includes via the `vscode-mcshader` language server (availability and platform vary). Prefer a known-good Base-330 pack to an empty one.
 
 ## Distribution
 
-Keep licenses intact when adapting templates or examples. Do not copy OptiFine documentation verbatim. State whether the pack is Iris-only or also targets OptiFine, list tested Minecraft/Iris/Sodium versions, and package a ZIP whose root has the expected `shaders/` directory.
+Keep template/example licenses intact; do not copy OptiFine docs verbatim. State Iris-only versus OptiFine targeting, list tested Minecraft/Iris/Sodium versions, and package a ZIP with `shaders/` at its root.

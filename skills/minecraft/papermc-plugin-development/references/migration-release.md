@@ -1,12 +1,8 @@
 # Migration, compatibility, and release
 
-## Contents
-
-[Scope](#load-this-reference-when) · [Version authorities](#establish-version-authorities) · [Sources](#migration-source-order) · [Workflow](#migration-workflow) · [Boundaries](#dated-compatibility-boundaries) · [Release](#release-decisions) · [Traps](#traps) · [Evidence](#required-evidence)
-
 ## Load this reference when
 
-Load this file for a Paper or Minecraft version change, Java toolchain change, API deprecation, Adventure migration, mapping transition, compatibility claim, version bump, CI release, or Hangar publication.
+Load for a Paper or Minecraft version change, Java toolchain change, API deprecation, Adventure migration, mapping transition, compatibility claim, version bump, CI release, or Hangar publication.
 
 ## Establish version authorities
 
@@ -20,7 +16,7 @@ Keep these concepts separate:
 - **Distribution platform range:** compatibility claimed to users.
 - **Mappings or remapping target:** relevant only when internals are used.
 
-Do not make one value imply the others. Preserve the repository's version source, tagging scheme, and release channel unless the task explicitly changes them.
+Keep these concepts independent. Preserve the repository's version source, tagging scheme, and release channel unless the task explicitly changes them.
 
 ## Migration source order
 
@@ -37,13 +33,13 @@ Never update an old maintenance branch to the newest API merely because it exist
 
 ## Migration workflow
 
-1. Record the current and target Paper, Minecraft, Java, API, mappings, and plugin versions.
+1. Record current and target Paper, Minecraft, Java, API, mappings, and plugin versions.
 2. Inventory public API, internal API, descriptor, dependency, resource, and CI surfaces affected.
 3. Read the target deprecated list and replacements before changing calls.
 4. Migrate public APIs first; isolate target-specific internal changes.
 5. Update build and descriptor source-of-truth values together.
 6. Compile with deprecation warnings visible.
-7. Test the minimum and latest claimed targets, not only the compile target.
+7. Test minimum and latest claimed targets, not only the compile target.
 8. Update publication ranges only after runtime proof.
 
 Do not suppress a deprecation without a documented compatibility reason. Scheduled-for-removal APIs need a migration plan.
@@ -56,7 +52,7 @@ These are historical boundaries, not floating current defaults:
 - **Paper 26.1:** API artifact versions changed to include an explicit build component, server JARs became unobfuscated, and the old reobfuscation release path ceased to work.
 - **Paper 26.2:** previously deprecated Adventure APIs and other deprecated surfaces were removed; consult the release announcement and target Javadocs rather than assuming source compatibility.
 
-For current dependency or tooling literals, consult the live official setup pages during the task. Do not freeze latest build numbers in the skill.
+For current dependency and tooling literals, consult live official setup pages during the task; do not freeze latest build numbers in the skill.
 
 ## Release decisions
 
@@ -69,7 +65,7 @@ For current dependency or tooling literals, consult the live official setup page
 - Preserve the project's existing artifact selection: plain, shaded, or target-specific. Never infer it from filename alone.
 - Re-read current Hangar documentation before editing workflow action or Java-version literals because examples age independently from the plugin.
 
-Paper does not mandate semantic versioning, tag format, branch model, or a universal CI workflow. Reuse repository policy.
+Paper does not mandate semantic versioning, tag format, branch model, or universal CI workflow; reuse repository policy.
 
 ## Traps
 

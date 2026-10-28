@@ -1,6 +1,6 @@
 # Optional media components
 
-Load this only for music and media UIs. The web modules live in `assets/web-adapter/`. Every module needs host elements, real data and one scheduling owner, and it must be disposed on teardown. No account data or reference screenshots are included.
+Load only for music/media UIs. Web modules live in `assets/web-adapter/`. Each module needs host elements, real data, one scheduling owner, and disposal on teardown. No account data or reference screenshots are included.
 
 ## Play button
 
@@ -12,7 +12,7 @@ Missing artwork becomes a deterministic sleeve, not a gradient or a random place
 
 ## Player scheme
 
-The player has its own scheme owner. Its palette comes from the current artwork and cross-fades over 600 ms InOutQuad. It follows the app's light/dark mode, and an always-dark scheme serves the immersive player. With no cover it falls back to the theme; in light mode the dark roles are re-seeded from the theme primary. Do not recolor player surfaces with the app scheme. Per-surface visualizer switches (player bar, song row, immersive) apply in addition to the master flag.
+The player has its own scheme owner. Its palette comes from the current artwork and cross-fades over 600 ms InOutQuad. It follows the app's light/dark mode, and an always-dark scheme serves the immersive player. With no cover it falls back to the theme; in light mode the dark roles are re-seeded from the theme primary. Don't recolor player surfaces with the app scheme. Per-surface visualizer switches (player bar, song row, immersive) apply in addition to the master flag.
 
 ## Immersive reveal (`immersive-controller.mjs`, `renderer-closure.mjs`)
 
@@ -22,7 +22,7 @@ Opening picks a shape from a 12-shape list (circle under noShapes; `DEFAULT_REVE
 
 ## Liquid backdrop (`liquid-backdrop.mjs`)
 
-`await LiquidBackdrop.create(canvas)`, then `resize(w,h)` and `setState({shown,playing,reduced,living,blur,palette,energy,lead})`. Supply real normalized RGBA palette and real audio energies; never invent analyzer data. `reduced` includes performanceMode. While paused, elapsed time holds. Reduced or non-living fields render the still time 37. A single 33 ms timer runs while shown and playing. Hidden fields release framebuffer storage. Call `resetClock()` after a loader-style teardown so the next instance starts at zero. Pixel evidence is DPR 1 only.
+`await LiquidBackdrop.create(canvas)`, then `resize(w,h)` and `setState({shown,playing,reduced,living,blur,palette,energy,lead})`. Supply real normalized RGBA palette and real audio energies; never invent analyzer data. `reduced` includes performanceMode. While paused, elapsed time holds. Reduced or non-living fields render the still time 37. `LiquidBackdrop` is a shared-clock exception: each instance owns one 33 ms timer only while shown, playing, non-reduced and living; hiding or disposal cancels it. Hidden fields release framebuffer storage. Call `resetClock()` after a loader-style teardown so the next instance starts at zero. Pixel evidence is DPR 1 only.
 
 ## Spectrum (`spectrum.mjs`)
 
@@ -30,4 +30,4 @@ Opening picks a shape from a 12-shape list (circle under noShapes; `DEFAULT_REVE
 
 ## Lyrics (`lyrics-panel.mjs`, `lyrics-closure.css`)
 
-`createLyricsView` takes lines, sync, the active index and `onSeek`. The host calls `advance(ms)` from its scheduler, sets `suspended` while the immersive view covers the panel, and resumes with `setState({suspended:false})`. Scale keeps separate `springing` and `eased` channels: switching the reduce/performance flags selects a channel while an already-running hidden spring continues. Do not cancel opacity or lag on suspension or performance toggles. Logical scroll = scrollTop − topMargin. Count the footer in content height, excluding list margins, instead of using viewport-clamped scrollHeight.
+`createLyricsView` takes lines, sync, the active index and `onSeek`. The host calls `advance(ms)` from its scheduler, sets `suspended` while the immersive view covers the panel, and resumes with `setState({suspended:false})`. Scale keeps separate `springing` and `eased` channels: switching the reduce/performance flags selects a channel while an already-running hidden spring continues. Don't cancel opacity or lag on suspension or performance toggles. Logical scroll = scrollTop − topMargin. Count the footer in content height, excluding list margins, instead of using viewport-clamped scrollHeight.

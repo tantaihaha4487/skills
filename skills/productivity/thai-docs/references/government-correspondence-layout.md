@@ -6,19 +6,19 @@ This reference gives source-backed formatting for `หนังสือภา�
 
 ## Page and emblem
 
-- Use 3 cm left and 2 cm right margins and single (`1.0`) line spacing within ordinary paragraphs. On A4, the usable text width is 16 cm; the page describes a 0–16 cm printing ruler. Control gaps between paragraphs separately. (OBEC §§1.1–1.3)
+- Use 3 cm left and 2 cm right margins and single (`1.0`) line spacing within ordinary paragraphs. On A4, the usable text width is 16 cm; the page describes a 0–16 cm printing ruler. Control paragraph gaps separately. (OBEC §§1.1–1.3)
 - For a letter on Garuda letterhead (`กระดาษตราครุฑ`, form `แบบที่ ๒๘`), set the Garuda emblem height to 3 cm and place it about 1.5 cm below the top edge. Preserve its aspect ratio; the page does not specify a width. An internal-memo emblem is 1.5 cm high and has its own profile. Use an authorized form/emblem asset rather than inventing one. (intro, §§2.1–2.2)
 
 ## External-letter flow
 
 - Keep the applicable form's `ที่`, sender/address, date, `เรื่อง`, salutation, `อ้างถึง` and `สิ่งที่ส่งมาด้วย` when present, body, closing, signatory name/position, and owner-office/contact area in their proper order. The OBEC example illustrates this flow; omit optional fields when not applicable rather than printing fictitious values. (§3.1 and linked external-letter DOCX)
-- Put `เรื่อง`, salutation, `อ้างถึง`, and `สิ่งที่ส่งมาด้วย` in separate paragraphs with 6 pt space before each applicable item (`1 Enter + before 6 pt` in the guidance). Use the same 6 pt before the reason, request, and conclusion body paragraphs. Here `1 Enter` is the paragraph break itself, **not** an extra blank line or a full line-height added to the 6 pt. Keep text within each paragraph single-spaced. (§§3.1.1–3.1.2)
-- Use a 2.5 cm first-line indent for the reason, request, and conclusion body paragraphs. This is a paragraph indent, not an extra page margin. (§3.1.3)
-- Put the closing in the next paragraph with 12 pt space before it (`1 Enter + before 12 pt`); do not add a separate blank line. Leave the equivalent of three blank typing lines before the full signatory name, and three blank typing lines between the signatory position and the owner-office identification. Reproduce these signature gaps with paragraph spacing/positioning where practical; do not build layout from long chains of spaces or empty paragraphs. (§§3.1.4–3.1.6)
-- The number of lines per page is content-dependent; the page allows reasonable adjustment to maintain the form and appearance. Other official-letter types are treated by analogy, not by blindly cloning this field sequence. (§§3.3–3.4 and note)
+- Put `เรื่อง`, salutation, `อ้างถึง`, and `สิ่งที่ส่งมาด้วย` in separate paragraphs with 6 pt space before each applicable item (`1 Enter + before 6 pt` in the guidance). Use the same 6 pt before the reason, request, and conclusion body paragraphs. `1 Enter` is the paragraph break, **not** an extra blank line or full line-height added to 6 pt. Keep paragraphs single-spaced. (§§3.1.1–3.1.2)
+- Use a 2.5 cm first-line paragraph indent for the reason, request, and conclusion body paragraphs; it is not an extra page margin. (§3.1.3)
+- Put the closing in the next paragraph with 12 pt space before it (`1 Enter + before 12 pt`); do not add a separate blank line. Leave the equivalent of three blank typing lines before the full signatory name, and three blank typing lines between the signatory position and the owner-office identification. Use paragraph spacing/positioning where practical; avoid long chains of spaces or empty paragraphs. (§§3.1.4–3.1.6)
+- Line count is content-dependent; adjust reasonably to maintain the form and appearance. Treat other official-letter types by analogy, not by cloning this field sequence. (§§3.3–3.4 and note)
 
 ## Unspecified values and verification
 
-The page does not state universal top/bottom margins, body font size, or a numeric width for the 3 cm external-letter emblem. Linked DOCX examples supply examples, not universal mandates. Use a current applicable institutional form where supplied, otherwise the skill's general defaults for unset values. Keep the user's selected font family throughout; the linked examples' mixed families do not override that requirement.
+The page does not state universal top/bottom margins, body font size, or a numeric width for the 3 cm external-letter emblem. Linked DOCX examples supply examples, not universal mandates. Use a current applicable institutional form where supplied, otherwise the skill's general defaults for unset values. Keep the user's selected font family throughout; mixed families in linked examples do not override it.
 
 Inspect the final DOCX and rendered PDF for page geometry, emblem placement, field order, single-spaced paragraphs, 2.5 cm body first-line indents, 6/12 pt inter-item gaps, signature area, Thai glyphs, and consistent font family. Distinguish a checked visual match from merely matching DOCX settings.

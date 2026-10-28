@@ -2,7 +2,7 @@
 
 ## Load this reference when
 
-Load this file only when an ItemStack requirement needs vanilla prototype or patch data beyond stable `ItemMeta`. The API is experimental and version-locked.
+Load only when an ItemStack requirement needs vanilla prototype or patch data beyond stable `ItemMeta`. The API is experimental and version-locked.
 
 ## Choose the right surface
 

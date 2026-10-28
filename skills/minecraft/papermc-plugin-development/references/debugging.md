@@ -2,7 +2,7 @@
 
 ## Load this reference when
 
-Load this file for exceptions, failed startup, missing registrations, incorrect behavior, classloading failures, shutdown faults, or an unexplained runtime regression.
+Load for exceptions, failed startup, missing registrations, incorrect behavior, classloading failures, shutdown faults, or an unexplained runtime regression.
 
 ## Preserve evidence first
 

@@ -1,4 +1,4 @@
 interface:
   display_name: "Expressive Motion"
-  short_description: "Measured Material 3 Expressive style and motion for any UI platform"
+  short_description: "Measured Material 3 Expressive style and motion for UI platforms"
   default_prompt: "Use $expressive-motion to build this interface in the expressive style with its exact tokens, layout and motion."

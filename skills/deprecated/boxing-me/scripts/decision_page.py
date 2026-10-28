@@ -16,6 +16,10 @@ from typing import Any
 
 MAX_BODY = 1_000_000
 
+
+def safe_json(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False).replace("<", "\\u003c").replace("&", "\\u0026")
+
 UI_TEXT = {
     "en": {
         "decision_brief": "Decision brief", "apply": "Apply recommendations", "clear": "Clear answers",
@@ -248,10 +252,10 @@ def validate_spec(spec: Any) -> None:
 
 
 def render_html(spec: dict[str, Any]) -> str:
-    safe_json = json.dumps(spec, ensure_ascii=False).replace("<", "\\u003c").replace("&", "\\u0026")
+    spec_json = safe_json(spec)
     locale = spec.get("locale", "en")
     ui = UI_TEXT[locale]
-    safe_ui = json.dumps(ui, ensure_ascii=False).replace("<", "\\u003c").replace("&", "\\u0026")
+    safe_ui = safe_json(ui)
     title = html.escape(spec["title"])
     page = '''<!doctype html>
 <html lang="__LANG__">
@@ -288,7 +292,7 @@ let editingId=null;
 const $=selector=>document.querySelector(selector),esc=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 const questions=()=>[...spec.questions.map(q=>({...q,source:"agent"})),...state.custom.map(q=>({...q,source:"user"}))];
 for(const q of questions()){const answer=state.answers[q.id];if(q.type==="multi"&&!Array.isArray(answer))delete state.answers[q.id];if(q.type!=="multi"&&answer!=null&&typeof answer!=="string")delete state.answers[q.id];if(state.notes[q.id]!=null&&typeof state.notes[q.id]!=="string")delete state.notes[q.id]}
-function conditionReady(condition,active){if(condition.length===2&&typeof condition[1]==="string")return active.has(condition[0]);const op=condition[0];if(op==="all"||op==="any")return condition.slice(1).every(item=>conditionReady(item,active));return conditionReady(condition[1],active)}
+function conditionReady(condition,active){if(condition.length===2&&typeof condition[1]==="string")return active.has(condition[0]);const op=condition[0];if(op==="all"||op==="any")return condition.slice(1)[op==="all"?"every":"some"](item=>conditionReady(item,active));return conditionReady(condition[1],active)}
 function conditionMatches(condition){if(condition.length===2&&typeof condition[1]==="string"){const answer=state.answers[condition[0]];return Array.isArray(answer)?answer.includes(condition[1]):answer===condition[1]}const op=condition[0];if(op==="all")return condition.slice(1).every(conditionMatches);if(op==="any")return condition.slice(1).some(conditionMatches);return !conditionMatches(condition[1])}
 function activeQuestions(){const active=new Set(),result=[];for(const q of questions()){if(!q.when||(conditionReady(q.when,active)&&conditionMatches(q.when))){active.add(q.id);result.push(q)}}return result}
 function persist(){localStorage.setItem(key,JSON.stringify(state))}
@@ -301,7 +305,7 @@ function answered(q){const answer=state.answers[q.id],other=(state.answers[`${q.
 function validate(show=false){let valid=true;const activeIds=new Set(activeQuestions().map(q=>q.id));for(const q of questions()){let message="";if(activeIds.has(q.id)){const answer=state.answers[q.id];if(q.required&&!answered(q))message=ui.choose_answer;if(q.type==="multi"){const count=(answer||[]).length+(state.answers[`${q.id}__other`]?.trim()?1:0),min=q.min??(q.required?1:0),max=q.max??q.options.length;if(count<min)message=ui.choose_min.replace("%n%",min);if(count>max)message=ui.choose_max.replace("%n%",max)}}if(message)valid=false;const el=$(`[data-error="${CSS.escape(q.id)}"]`);if(el)el.textContent=show?message:""}return valid}
 function answerPayload(q){const ids=q.type==="multi"?(state.answers[q.id]||[]):state.answers[q.id]?[state.answers[q.id]]:[];return{question_id:q.id,prompt:q.prompt,selected:ids.map(id=>{const option=(q.options||[]).find(item=>item.id===id);return{id,label:option?.label||id}}),text:q.type==="text"?(state.answers[q.id]||""):undefined,other:state.answers[`${q.id}__other`]||"",notes:state.notes[q.id]||"",source:q.source}}
 function payload(){return{format:"boxing-me-response-v1",spec_id:spec.id,spec_title:spec.title,saved_at:new Date().toISOString(),answers:activeQuestions().map(answerPayload),overall_notes:state.overall||"",custom_questions:state.custom}}
-function brief(){const response=payload();return[`${ui.brief_title} ${response.spec_title}`,...response.answers.map(answer=>{const value=answer.text||answer.selected.map(item=>item.label).join(", ")||answer.other||ui.unanswered;return`- ${answer.prompt}: ${value}${answer.other&&value!==answer.other?`; ${ui.other_brief} ${answer.other}`:""}${answer.notes?`; ${ui.notes_brief} ${answer.notes}`:""}`}),response.overall_notes?`- ${ui.overall_brief} ${response.overall_notes}`:null].filter(Boolean).join(String.fromCharCode(10))}
+function brief(){const response=payload();return[`${ui.brief_title} ${response.spec_title}`,...response.answers.map(answer=>{const value=answer.text||answer.selected.map(item=>item.label).join(", ")||answer.other||ui.unanswered;return`- ${answer.prompt}: ${value}${answer.other&&value!==answer.other?`; ${ui.other_brief} ${answer.other}`:""}${answer.notes?`; ${ui.notes_brief} ${answer.notes}`:""}`}),response.overall_notes?`- ${ui.overall_brief} ${response.overall_notes}`:null].filter(Boolean).join("\\n")}
 function update(){const active=activeQuestions(),activeIds=new Set(active.map(q=>q.id));let number=0;document.querySelectorAll("[data-question]").forEach(section=>{const visible=activeIds.has(section.dataset.question);section.hidden=!visible;if(visible)section.querySelector(".qnum").textContent=`${questions().find(q=>q.id===section.dataset.question)?.source==="user"?ui.custom:ui.decision} ${++number}`});document.querySelectorAll(".option").forEach(el=>el.classList.toggle("selected",el.querySelector("input").checked));const done=active.filter(answered).length;$("#bar").style.width=`${active.length?done/active.length*100:0}%`;$("#count").textContent=ui.count.replace("%done%",done).replace("%total%",active.length);const response=payload();$("#summary").innerHTML=response.answers.map(answer=>{const value=answer.text||answer.selected.map(item=>item.label).join(", ")||answer.other||ui.not_answered;return`<div class="summary-row"><strong>${esc(answer.prompt)}</strong><span>${esc(value)}</span></div>`}).join("");validate(false)}
 function slug(value){return value.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40)||"custom"}
 function uniqueId(value,used){const base=slug(value);let id=base,index=2;while(used.has(id))id=`${base}-${index++}`;return id}
@@ -321,7 +325,7 @@ $("#copy").addEventListener("click",async()=>{try{await navigator.clipboard.writ
 $("#save").addEventListener("click",async()=>{if(!validate(true)){$("#status").textContent=ui.complete_required;document.querySelector(".error:not(:empty)")?.scrollIntoView({behavior:"smooth",block:"center"});return}const button=$("#save");button.disabled=true;try{const response=await fetch("/api/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload())});if(!response.ok)throw new Error();const result=await response.json();$("#status").textContent=`${ui.saved} (${result.filename})`}catch{$("#status").textContent=ui.save_fallback;$("#download").click()}finally{button.disabled=false}});
 staticText();renderQuestions();
 </script></body></html>'''
-    replacements = {"LANG": locale, "TITLE": title, "SPEC": safe_json, "UI": safe_ui}
+    replacements = {"LANG": locale, "TITLE": title, "SPEC": spec_json, "UI": safe_ui}
     return re.sub(r"__(LANG|TITLE|SPEC|UI)__", lambda match: replacements[match.group(1)], page)
 
 

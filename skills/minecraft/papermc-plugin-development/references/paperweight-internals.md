@@ -2,7 +2,7 @@
 
 ## Load this reference when
 
-Load this file only when a task touches net.minecraft classes, CraftBukkit implementation details, mappings, reflection over internals, version adapters, remapping, or a paperweight-userdev build.
+Load only when a task touches net.minecraft classes, CraftBukkit implementation details, mappings, reflection over internals, version adapters, remapping, or a paperweight-userdev build.
 
 ## Apply the internals decision gate
 

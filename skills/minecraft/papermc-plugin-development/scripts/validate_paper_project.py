@@ -9,9 +9,11 @@ from __future__ import annotations
 import argparse
 import os
 import re
+from paper_descriptor import has_unresolved_placeholders, top_level_yaml
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import zipfile
 from pathlib import Path
@@ -19,6 +21,12 @@ from pathlib import Path
 
 DESCRIPTOR_NAMES = ("plugin.yml", "paper-plugin.yml")
 IGNORED_JAR_MARKERS = ("-sources", "-javadoc", "-tests", "original-", "-plain")
+SUMMARY_TAIL_LINES = 40
+SUMMARY_TAIL_CHARS = 8_000
+SUMMARY_TAIL_SCAN_BYTES = 64 * 1024
+LONG_LINE_MARKER = "\n... [middle of long diagnostic omitted] ...\n"
+CLIPPED_LINE_MARKER = "... [beginning of diagnostic line is outside scan window] ...\n"
+TAIL_TRUNCATION_MARKER = "... [earlier build output omitted] ...\n"
 
 
 def parse_args() -> argparse.Namespace:
@@ -49,13 +57,27 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="compile without producing/inspecting a JAR",
     )
+    parser.add_argument(
+        "--summary-capture",
+        action="store_true",
+        help="capture the complete build log and print a bounded failure tail",
+    )
     return parser.parse_args()
 
 
 def build_command(
     root: Path, compile_only: bool, requested: str | None, build_tasks: list[str]
 ) -> tuple[list[str], str | None]:
-    has_gradle = any((root / name).is_file() for name in ("gradlew", "build.gradle", "build.gradle.kts"))
+    has_gradle = any(
+        (root / name).is_file()
+        for name in (
+            "gradlew",
+            "settings.gradle",
+            "settings.gradle.kts",
+            "build.gradle",
+            "build.gradle.kts",
+        )
+    )
     has_maven = any((root / name).is_file() for name in ("mvnw", "pom.xml"))
     if requested == "gradle" and not has_gradle:
         raise RuntimeError("--build-system gradle was selected, but no root Gradle build was found")
@@ -72,11 +94,10 @@ def build_command(
         if gradle:
             return ([gradle, *actions], "Gradle wrapper absent; used system Gradle.")
         raise RuntimeError("Gradle project has no ./gradlew and no system gradle was found")
-    if selected == "maven" and (root / "mvnw").is_file():
-        actions = build_tasks or (["compile"] if compile_only else ["verify"])
-        return (["./mvnw", "-B", *actions], None)
     if selected == "maven":
         actions = build_tasks or (["compile"] if compile_only else ["verify"])
+        if (root / "mvnw").is_file():
+            return (["./mvnw", "-B", *actions], None)
         maven = shutil.which("mvn")
         if maven:
             return ([maven, "-B", *actions], "Maven wrapper absent; used system Maven.")
@@ -91,20 +112,12 @@ def source_descriptors(root: Path) -> list[Path]:
             path
             for path in root.rglob(name)
             if path.is_file()
-            and not any(part in {".git", "build", "target", "out"} for part in path.parts)
+            and not any(
+                part in {".git", "build", "target", "out"}
+                for part in path.relative_to(root).parts
+            )
         )
     return sorted(found)
-
-
-def top_level_yaml(text: str) -> dict[str, str]:
-    values: dict[str, str] = {}
-    for line in text.splitlines():
-        if not line or line[0].isspace() or line.lstrip().startswith("#"):
-            continue
-        match = re.match(r"^([A-Za-z0-9_-]+):\s*(.*?)\s*$", line)
-        if match:
-            values[match.group(1)] = match.group(2).strip("'\"")
-    return values
 
 
 def descriptor_issues(name: str, text: str) -> tuple[list[str], list[str], dict[str, str]]:
@@ -114,7 +127,7 @@ def descriptor_issues(name: str, text: str) -> tuple[list[str], list[str], dict[
     for key in ("name", "version", "main"):
         if not values.get(key):
             failures.append(f"{name}: missing top-level {key!r}")
-    if re.search(r"\$\{[^}]+}|@[A-Za-z0-9_.-]+@", text):
+    if has_unresolved_placeholders(values):
         failures.append(f"{name}: unresolved resource placeholder remains")
     if not values.get("api-version"):
         warnings.append(f"{name}: api-version is absent; confirm legacy compatibility is intentional")
@@ -133,12 +146,12 @@ def validate_source_descriptors(root: Path) -> tuple[list[str], list[str]]:
         warnings.append("No static source descriptor found; verify whether the build generates it")
     for path in paths:
         text = path.read_text(encoding="utf-8", errors="replace")
-        found_failures, found_warnings, _ = descriptor_issues(str(path.relative_to(root)), text)
+        found_failures, found_warnings, values = descriptor_issues(str(path.relative_to(root)), text)
         # Source descriptors may intentionally contain build placeholders.
         found_failures = [
             item for item in found_failures if "unresolved resource placeholder" not in item
         ]
-        if re.search(r"\$\{[^}]+}|@[A-Za-z0-9_.-]+@", text):
+        if has_unresolved_placeholders(values):
             found_warnings.append(f"{path.relative_to(root)}: build must resolve descriptor placeholders")
         failures.extend(found_failures)
         warnings.extend(found_warnings)
@@ -149,12 +162,8 @@ def candidate_artifacts(root: Path) -> list[Path]:
     candidates: list[Path] = []
     for path in root.rglob("*.jar"):
         relative_parts = path.relative_to(root).parts
-        in_gradle_libs = any(
-            relative_parts[index : index + 2] == ("build", "libs")
-            for index in range(len(relative_parts) - 1)
-        )
-        in_maven_target = path.parent.name == "target"
-        if (in_gradle_libs or in_maven_target) and not any(
+        in_gradle_libs = ("build", "libs") in zip(relative_parts, relative_parts[1:])
+        if (in_gradle_libs or path.parent.name == "target") and not any(
             marker in path.name for marker in IGNORED_JAR_MARKERS
         ):
             candidates.append(path.resolve())
@@ -216,9 +225,9 @@ def inspect_jar(path: Path) -> tuple[list[str], list[str]]:
                     )
         if "org/bukkit/Bukkit.class" in names or "io/papermc/paper/plugin/PluginInitializerManager.class" in names:
             failures.append("artifact appears to bundle the Bukkit/Paper server API")
-        service_entries = sorted(name for name in names if name.startswith("META-INF/services/") and not name.endswith("/"))
-        if service_entries:
-            warnings.append(f"artifact contains {len(service_entries)} service descriptor(s); verify shading merged them")
+        service_count = sum(name.startswith("META-INF/services/") and not name.endswith("/") for name in names)
+        if service_count:
+            warnings.append(f"artifact contains {service_count} service descriptor(s); verify shading merged them")
     return failures, warnings
 
 
@@ -232,8 +241,88 @@ def print_results(label: str, failures: list[str], warnings: list[str]) -> None:
         print("  PASS")
 
 
+def build_log_path(root: Path) -> Path:
+    temp_dir = Path(tempfile.gettempdir()).resolve()
+    if root == temp_dir or root in temp_dir.parents:
+        raise RuntimeError(
+            f"temporary directory is inside the project tree; set TMPDIR outside {root}"
+        )
+    try:
+        descriptor, name = tempfile.mkstemp(
+            prefix="paper-validation-", suffix=".log", dir=temp_dir
+        )
+    except OSError as error:
+        raise RuntimeError(f"could not create temporary build log: {error}") from error
+    path = Path(name)
+    try:
+        os.close(descriptor)
+    except OSError as error:
+        try:
+            os.close(descriptor)
+        except OSError:
+            pass
+        try:
+            path.unlink()
+        except OSError as cleanup_error:
+            raise RuntimeError(
+                f"could not create temporary build log: {error}; "
+                f"log path retained after cleanup failure: {path} ({cleanup_error})"
+            ) from error
+        raise RuntimeError(f"could not create temporary build log: {error}") from error
+    try:
+        os.chmod(path, 0o600)
+    except OSError:
+        # mkstemp is private by default; retain that platform default when chmod is unavailable.
+        pass
+    return path
+
+
+def build_failure_tail(path: Path) -> str:
+    with path.open("rb") as log:
+        log.seek(0, os.SEEK_END)
+        end = log.tell()
+        start = max(0, end - SUMMARY_TAIL_SCAN_BYTES)
+        log.seek(start)
+        text = log.read(end - start).decode("utf-8", "ignore" if start else "replace")
+    clipped_line = False
+    if start:
+        first_newline = text.find("\n")
+        if first_newline >= 0:
+            leading = text[:first_newline].rstrip("\r")
+            remainder = text[first_newline + 1 :]
+            if remainder.strip():
+                text = remainder
+            else:
+                text = leading
+                clipped_line = True
+        else:
+            clipped_line = True
+    lines = text.splitlines()[-SUMMARY_TAIL_LINES:]
+    if clipped_line and lines:
+        suffix_length = SUMMARY_TAIL_CHARS - len(CLIPPED_LINE_MARKER)
+        return CLIPPED_LINE_MARKER + lines[-1][-suffix_length:]
+    if lines and len(lines[-1]) > SUMMARY_TAIL_CHARS:
+        line = lines[-1]
+        available = SUMMARY_TAIL_CHARS - len(LONG_LINE_MARKER)
+        prefix_length = available // 2
+        suffix_length = available - prefix_length
+        return (
+            line[:prefix_length]
+            + LONG_LINE_MARKER
+            + line[-suffix_length:]
+        )
+    tail = "\n".join(lines)
+    if len(tail) > SUMMARY_TAIL_CHARS:
+        suffix_length = SUMMARY_TAIL_CHARS - len(TAIL_TRUNCATION_MARKER)
+        tail = TAIL_TRUNCATION_MARKER + tail[-suffix_length:]
+    return tail
+
+
 def main() -> int:
     args = parse_args()
+    if args.summary_capture and args.skip_build:
+        print("error: --summary-capture cannot be combined with --skip-build", file=sys.stderr)
+        return 2
     root = Path(args.root).resolve()
     if not root.is_dir():
         print(f"error: not a directory: {root}", file=sys.stderr)
@@ -275,8 +364,49 @@ def main() -> int:
             print(f"Build JDK: {java_home}")
         sys.stdout.flush()
         build_started_at = time.time()
-        result = subprocess.run(command, cwd=root, check=False, env=environment)
-        if result.returncode != 0:
+        build_log: Path | None = None
+        if args.summary_capture:
+            try:
+                build_log = build_log_path(root)
+            except RuntimeError as error:
+                print(f"error: {error}", file=sys.stderr)
+                return 2
+            try:
+                with build_log.open("wb") as output:
+                    result = subprocess.run(
+                        command,
+                        cwd=root,
+                        check=False,
+                        env=environment,
+                        stdout=output,
+                        stderr=subprocess.STDOUT,
+                    )
+            except OSError as error:
+                try:
+                    build_log.unlink()
+                except OSError as cleanup_error:
+                    print(
+                        f"error: could not write build log {build_log}: {error}; "
+                        f"log path retained after cleanup failure: {cleanup_error}",
+                        file=sys.stderr,
+                    )
+                else:
+                    print(f"error: could not write build log {build_log}: {error}", file=sys.stderr)
+                return 2
+            print(f"Build exit status: {result.returncode}")
+            print(f"Build log: {build_log}")
+        else:
+            result = subprocess.run(command, cwd=root, check=False, env=environment)
+        if result.returncode:
+            if build_log:
+                print("Build failure tail:")
+                try:
+                    tail = build_failure_tail(build_log)
+                except OSError as error:
+                    print(f"WARN: could not read build log {build_log}: {error}", file=sys.stderr)
+                else:
+                    if tail:
+                        print(tail)
             print(f"FAIL: build exited with status {result.returncode}", file=sys.stderr)
             return result.returncode or 1
     elif args.compile_only:

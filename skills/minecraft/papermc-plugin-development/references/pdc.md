@@ -2,7 +2,7 @@
 
 ## Load this reference when
 
-Use this file for plugin-owned metadata on supported holders such as items, entities, chunks, worlds, or tile states. Use configuration for operator settings, a database for large/queryable records, Data Components for vanilla item behavior, and PDC for namespaced plugin data.
+Use for plugin-owned metadata on supported holders such as items, entities, chunks, worlds, or tile states. Use configuration for operator settings, a database for large/queryable records, Data Components for vanilla item behavior, and PDC for namespaced plugin data.
 
 ## Decide the persisted schema first
 

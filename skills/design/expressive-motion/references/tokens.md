@@ -1,6 +1,6 @@
 # Tokens, type, color and shapes
 
-Values are logical px (dp/pt at 1:1). They are this style's choices, not the generic Material specification. Use the named value; do not round everything to multiples of 4.
+Values are logical px (dp/pt at 1:1), chosen by this style rather than generic Material. Use named values; don't round to multiples of 4.
 
 ## Numeric tokens (assets/tokens.json)
 
@@ -10,7 +10,7 @@ Values are logical px (dp/pt at 1:1). They are this style's choices, not the gen
 | Font sizes | smallest 10, smaller 12, smallie 13, small 15, normal 16, large 17, larger 19, huge 22, hugeAss 23, title 22, headline 30, display 36 |
 | Sizes | elevationMargin 10, pageMargin 32, sectionGap 32, shelfGap 16, cardSize 176, headerArtwork 232, artworkRadius 12, smallArtworkRadius 7, sideSheetWidth 320, topBarHeight 64, playerBarClearance 120 |
 
-Keep these role names. Do not rename them to standard Material typography roles and then assume parity.
+Keep role names; don't rename them to standard Material typography roles and assume parity.
 
 ## Type and icons
 
@@ -25,9 +25,9 @@ Colors come from a role scheme, not literals. A palette variant (lowest, window,
 - Each accent gets its tone, an `on` color picked for WCAG contrast, and a container wash mix(tone,page, .3 dark / .22 light). On-container ink mixes toward text until contrast ≥ 4.5.
 - Fixed roles mix the tone toward white (.3/.6) and black (.2/.5).
 
-Layers: layer0=background, layer1=surfaceContainerLow, layer2=surfaceContainer, layer3=surfaceContainerHigh, layer4=surfaceContainerHighest, each with a paired onLayer role. Examples of derived states: layer1Hover=mix(layer1,onLayer1,.92), layer1Active=mix(layer1,onLayer1,.85), layer2Disabled=mix(layer2,background,.8), tooltip=inverseSurface, scrimOverlay=black@.5, shadowColor=black@.3. `mix(a,b,t)` weights a by t. Keep the derivation; do not flatten primaryContainer, secondaryContainer or the hover layers into one accent or one grey.
+Layers: layer0=background, layer1=surfaceContainerLow, layer2=surfaceContainer, layer3=surfaceContainerHigh, layer4=surfaceContainerHighest, each with a paired onLayer role. Examples of derived states: layer1Hover=mix(layer1,onLayer1,.92), layer1Active=mix(layer1,onLayer1,.85), layer2Disabled=mix(layer2,background,.8), tooltip=inverseSurface, scrimOverlay=black@.5, shadowColor=black@.3. `mix(a,b,t)` weights a by t. Keep the derivation; don't flatten primaryContainer, secondaryContainer or the hover layers into one accent or one grey.
 
-Default palette (the theme source can replace it; do not hardcode one theme as every theme):
+Default palette (the theme source can replace it; don't hardcode one theme as every theme):
 
 - Dark: #000000, #000000, #121212, #1f1f1f, #2a2a2a, #3e3e3e, #ffffff, #b3b3b3, #7c7c7c, #1ed760, #b3b3b3, #1db954, #f3727f
 - Light: #ffffff, #f0f0f0, #ffffff, #f6f6f6, #ededed, #dedede, #121212, #6a6a6a, #8f8f8f, #1aa34a, #6a6a6a, #169c46, #e91429
@@ -40,4 +40,4 @@ Shapes are distance-field shapes from a versioned catalogue, not CSS border-radi
 
 Polar/superellipse params include cookie4=(4,.12,1,0), softCookie=(5,.06,1.15,0), clover4=(4,.42,.55,0), sunny=(8,.14,2.2,0), burst=(12,.24,2.8,0) and squircle=(0,0,4,1); unlisted names default to (0,0,1,0). Keep named geometry through the atlas or an authorized derived export. Turning every shape into a circle loses parity.
 
-The `noShapes` setting is independent of the motion settings. It turns every shape into a circle except items marked `keepsShape` (shape icons, heart), and it flattens wavy pills/clips, squiggle rings and cover edges. Fonts and artwork carry their own licences; this skill does not grant redistribution rights.
+The `noShapes` setting is independent of the motion settings. It turns every shape into a circle except items marked `keepsShape` (shape icons, heart), and it flattens wavy pills/clips, squiggle rings and cover edges. Fonts and artwork carry their own licences; this skill doesn't grant redistribution rights.

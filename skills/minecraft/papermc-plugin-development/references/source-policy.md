@@ -27,7 +27,7 @@ Re-check rather than memorize:
 - Folia scheduler behavior and support restrictions;
 - client protocol, registry, recipe, and data-component behavior.
 
-Use the reference files to decide what must be checked. Never copy their example version into a project without matching the repository's target.
+Use references to choose checks; never copy an example version without matching the repository target.
 
 ## Handle gaps
 

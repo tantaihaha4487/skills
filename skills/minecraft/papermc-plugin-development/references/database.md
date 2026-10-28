@@ -2,7 +2,7 @@
 
 ## Scope
 
-Use this reference when plugin data exceeds simple configuration or flat-file needs. Preserve an
+Use when plugin data exceeds simple configuration or flat-file needs. Preserve an
 existing repository's storage abstraction, schema conventions, and migration mechanism.
 
 ## Choose storage from workload
@@ -13,7 +13,7 @@ existing repository's storage abstraction, schema conventions, and migration mec
   operations, or scalability justify the deployment cost.
 - Decide SQL versus another model from query and consistency requirements, not trend or habit.
 
-Paper's database guide notes that its SQLite JDBC driver is bundled and that HikariCP is not.
+Paper's database guide notes that the SQLite JDBC driver is bundled but HikariCP is not.
 Treat bundled libraries as target-version-sensitive: verify the selected Paper documentation and
 runtime before omitting a dependency. If a library is not supplied, follow the repository's
 established library-loader or shading/relocation strategy; never copy a version from an example.

@@ -47,11 +47,12 @@ const defaults = {
   axes: '',
   horizontalAlignment: 'Text.AlignLeft',
   verticalAlignment: 'Text.AlignTop',
+  quiet: false,
 };
 
 function usage(message) {
   if (message) console.error(`error: ${message}`);
-  console.error('usage: regenerate-font-surface.cjs --text STRING --output PNG [--width N --height N --pixel-size N --weight Font.Medium --color #fff --family "Google Sans Flex" --elide Text.ElideRight]');
+  console.error('usage: regenerate-font-surface.cjs --text STRING --output PNG [--width N --height N --pixel-size N --weight Font.Medium --color #fff --family "Google Sans Flex" --elide Text.ElideRight --quiet]');
   process.exit(2);
 }
 
@@ -63,6 +64,10 @@ function parseArgs(argv) {
     const key = token.slice(2).replaceAll('-', '_');
     if (key === 'help') {
       usage();
+    }
+    if (key === 'quiet') {
+      options.quiet = true;
+      continue;
     }
     if (index + 1 >= argv.length) usage(`missing value for ${token}`);
     const value = argv[++index];
@@ -109,7 +114,7 @@ function qmlWeight(value) {
 function qmlAxes(value) {
   if (!value) return '({})';
   const axes = {};
-  for (const part of String(value).split(',')) {
+  for (const part of value.split(',')) {
     const [tag, raw] = part.split('=');
     const number = Number(raw);
     if (!tag || !Number.isFinite(number)) usage(`invalid --axes entry ${part}`);
@@ -183,7 +188,7 @@ Window {
     FontLoader {
         id: suppliedFont
         // The caller's fontFile is loaded before the export frame is accepted.
-        source: /* fontFile supplied by caller */ ${qmlString(suppliedFontSource)}
+        source: ${qmlString(suppliedFontSource)}
     }
 
     function fontReady(): bool {
@@ -350,7 +355,8 @@ Window {
       fs.rmSync(pendingImage, {force:true});
       fs.rmSync(pendingManifest, {force:true});
     }
-    process.stdout.write(`${JSON.stringify(manifest)}\n`);
+    if (options.quiet) process.stdout.write(`${JSON.stringify(output)}\n`);
+    else process.stdout.write(`${JSON.stringify(manifest)}\n`);
   } finally {
     fs.rmSync(tempDir, { recursive: true, force: true });
   }

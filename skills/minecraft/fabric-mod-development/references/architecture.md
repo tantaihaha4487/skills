@@ -1,6 +1,6 @@
 # Architecture and Lifecycle
 
-Use this reference to locate a change in Fabric's loading model and to prevent environment, lifecycle, and ownership errors.
+Use to locate changes in Fabric's loading model and prevent environment, lifecycle, or ownership errors.
 
 ## System Model
 
@@ -18,10 +18,10 @@ Do not treat “Fabric version” as a single value. Record Minecraft, Java, map
 2. It reads `fabric.mod.json`, resolves dependency and environment constraints, and discovers entrypoints, Mixins, and the class tweaker/access widener.
 3. Class transforms are prepared before affected classes load.
 4. Common `main` entrypoints initialize in every allowed physical environment.
-5. Client entrypoints initialize only on a physical client; dedicated-server entrypoints initialize only on a physical dedicated server.
+5. Client entrypoints initialize only on physical clients; dedicated-server entrypoints initialize only on physical dedicated servers.
 6. Registered callbacks execute later at their documented lifecycle points.
 
-Initializers are bootstrap locations, not a signal that every other mod or every resource is ready. Entrypoint order between mods is generally not a dependency mechanism; declare dependencies and use lifecycle-specific callbacks instead.
+Initializers bootstrap only; they don't imply other mods/resources are ready. Entrypoint order between mods generally isn't a dependency mechanism; declare dependencies and use lifecycle-specific callbacks.
 
 ## Physical Environment vs Logical Side
 
@@ -51,7 +51,7 @@ src/gametest/java/      game tests when configured
 src/main/generated/     common datagen output by convention
 ```
 
-Older or unsplit repositories may keep client packages under `src/main/java`. Preserve the local layout unless restructuring is requested, but recognize that the compiler then cannot enforce client isolation.
+Older or unsplit repositories may keep client packages under `src/main/java`. Preserve local layout unless restructuring is requested; the compiler then cannot enforce client isolation.
 
 ## Ownership Questions
 

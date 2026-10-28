@@ -1,6 +1,6 @@
 # Evaluation and evidence
 
-The oracle is this style's recorded values plus, when one exists, a reference implementation built in the style. It is not another skill or a generic design score. Freeze the inputs for every fixture: view, data, font, theme, window, settings, runtime version and random seed. Do not refresh goldens to make a failure pass.
+The oracle is this style's recorded values plus an in-style reference implementation when available. It isn't another skill or generic design score. Freeze every fixture input: view, data, font, theme, window, settings, runtime version and random seed. Never refresh goldens to make failures pass.
 
 ## Offline checks (from the skill folder)
 
@@ -15,7 +15,7 @@ python scripts/tokens.py --platform css
 python scripts/tokens.py --platform qml
 ```
 
-`test_source_adapters.mjs` checks 336 numeric values across ten zoom/fit cases and six spectrum band mappings, plus panel-state semantics. Stable bytes across repeated exports prove deterministic conversion only.
+`test_source_adapters.mjs` checks 336 numeric values across ten zoom/fit cases, six spectrum band mappings and panel-state semantics. Stable bytes across repeated exports prove deterministic conversion only.
 
 ## Measured adapter accuracy (against Qt 6.12 reference builds)
 
@@ -25,13 +25,15 @@ python scripts/tokens.py --platform qml
 - Rounded-image and reveal shaders: 85/85 at SSIM ≥ .98 and max ΔE2000 ≤ 2 on matched Qt XCB vs Chromium ANGLE GL. SwiftShader passes 73/85. Smooth (LINEAR) is the default; nearest differs in 18,280 pixels.
 - Liquid backdrop (320×180, t=37): SSIM .992, mean ΔE2000 .37. Spectrum: 6/6 on the same GPU (min SSIM .9999987). SwiftShader fails the strict color gate, so pin the backend.
 - Text: pure HTML card typography failed (.965). Font-derived Qt text surfaces pass full-card SSIM .983 at the .98 gate. A whole-view shell fixture passes .981 (526×410), .988 (988×410) and .995 (1280×780), byte-identical across three fresh Chromium processes.
-- Native raster repeatability needs QT_HASH_SEED=0, 64 warm-up frames, an injected drift phase and every nonempty image Ready before capture. A QAnimationDriver does not freeze FrameAnimation time.
+- Native raster repeatability needs QT_HASH_SEED=0, 64 warm-up frames, an injected drift phase and every nonempty image Ready before capture. A QAnimationDriver doesn't freeze FrameAnimation time.
 
-These results bound the shipped adapters. They do not prove every GPU, viewport, provider route or browser version.
+These results bound shipped adapters; they don't prove every GPU, viewport, provider route or browser version.
 
 ## Image comparison
 
 `python scripts/compare_images.py ref.png candidate.png --output result.json --preview cmp.png` (Pillow and NumPy; sizes must match). SSIM uses an 11 px Gaussian window with sigma 1.5. The script also reports the CIEDE2000 distribution, RMSE and differing pixels. `--color-roi x,y,w,h` adds named regions without masking the full SSIM. The CIEDE2000 implementation passes all 34 Sharma reference pairs (https://hajim.rochester.edu/ece/sites/gsharma/ciede2000/). These thresholds are research gates, not universal quality standards.
+
+For batch runs whose downstream step reads the saved JSON, add `--quiet` to print only its JSON-quoted result path.
 
 ## Behavioral trials
 

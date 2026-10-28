@@ -1,6 +1,6 @@
 # Client Separation and Rendering
 
-Use this reference for renderers, HUD or GUI drawing, models, screens, key input, and any code importing client-only Minecraft classes.
+Use for renderers, HUD/GUI, models, screens, key input, or client-only Minecraft imports.
 
 ## Client Boundary
 
@@ -17,7 +17,7 @@ Prefer, in order:
 1. JSON/resource model, item model, blockstate, tint, or built-in renderer registration.
 2. Stable Fabric rendering callback or renderer abstraction for the exact version.
 3. A custom render pipeline/state implementation.
-4. A narrow client Mixin only when no supported hook exposes the required phase.
+4. A narrow client Mixin only when no supported hook exposes that phase.
 
 Do not issue legacy direct OpenGL calls. Use Minecraft/Fabric render abstractions so ordering, state, batching, and compatibility remain under the engine's control.
 

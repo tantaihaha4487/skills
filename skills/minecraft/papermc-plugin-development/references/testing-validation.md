@@ -1,18 +1,14 @@
 # Testing and validation
 
-## Contents
-
-[Scope](#load-this-reference-when) · [Sequence](#minimum-validation-sequence) · [Evidence matrix](#evidence-matrix) · [Artifact](#inspect-the-artifact) · [Runtime](#runtime-scenarios) · [Threading](#threading-validation-questions) · [Traps](#traps) · [Reporting](#completion-report)
-
 ## Load this reference when
 
-Load this file before implementing a nontrivial change and again before declaring it complete. Use it to select evidence proportionate to the change's lifecycle, threading, persistence, compatibility, and artifact risk.
+Load before nontrivial changes and before completion; select evidence proportionate to lifecycle, threading, persistence, compatibility, and artifact risk.
 
 ## Follow repository-native validation
 
 Paper does not mandate a unit-test framework or repository layout. Use the checked-in Gradle or Maven wrapper and existing formatting, static-analysis, unit, integration, run-server, and CI tasks. Do not introduce a new framework merely to satisfy a generic checklist.
 
-Pure Java domain logic can be proven with unit tests. Plugin loading, descriptors, commands, events, scheduler context, world access, persistence, and shutdown require a real Paper runtime or an existing integration harness that proves the same contract.
+Unit-test pure Java domain logic. Plugin loading, descriptors, commands, events, scheduler context, world access, persistence, and shutdown require a real Paper runtime or an existing integration harness proving the same contract.
 
 ## Minimum validation sequence
 
@@ -25,7 +21,7 @@ Pure Java domain logic can be proven with unit tests. Plugin loading, descriptor
 7. Exercise changed registration, behavior, failure, disable, and restart paths.
 8. Expand to the declared version and Folia matrix when compatibility is affected.
 
-Do not use server /reload as a substitute for disable and restart.
+Do not use server /reload instead of disable and restart.
 
 ## Evidence matrix
 
@@ -70,7 +66,7 @@ Use a clean test server or the repository's official run task. Capture:
 - disable and process-exit behavior;
 - restart and persisted-state behavior.
 
-For stack traces, identify the first plugin-owned frame and preserve the full causal chain. Do not dismiss warnings merely because the server remains running.
+For stack traces, identify the first plugin-owned frame and preserve the full causal chain. Do not dismiss warnings because the server remains running.
 
 When the plugin declares a range, test at least the minimum and newest supported boundary. When it declares folia-supported, Paper success is not Folia evidence.
 

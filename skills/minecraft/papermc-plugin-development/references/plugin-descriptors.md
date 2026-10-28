@@ -2,7 +2,7 @@
 
 ## Load this reference when
 
-Load this file when creating or changing plugin.yml, paper-plugin.yml, command or permission declarations, plugin dependencies, bootstrap or loader classes, library resolution, load order, or Folia metadata.
+Load when creating or changing plugin.yml, paper-plugin.yml, command or permission declarations, plugin dependencies, bootstrap or loader classes, library resolution, load order, or Folia metadata.
 
 ## Choose the descriptor deliberately
 

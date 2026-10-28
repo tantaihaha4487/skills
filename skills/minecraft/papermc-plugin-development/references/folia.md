@@ -2,7 +2,7 @@
 
 ## Scope
 
-Use this reference only when a repository already claims Folia support or the requested change
+Use only when a repository already claims Folia support or the requested change
 introduces that support. Use [scheduler.md](scheduler.md) to select APIs and
 [thread-safety.md](thread-safety.md) for plugin-owned concurrency.
 

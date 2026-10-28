@@ -1,6 +1,6 @@
 # Common Reasoning Patterns
 
-Load this reference when a change crosses lifecycle, state, integration, or asynchronous boundaries. These are synthesis patterns, not a Paper-mandated package layout. Apply them only when they fit the repository.
+Load when a change crosses lifecycle, state, integration, or asynchronous boundaries. These are synthesis patterns, not a Paper-mandated package layout. Apply them only when they fit the repository.
 
 ## Compose at the owned lifecycle boundary
 

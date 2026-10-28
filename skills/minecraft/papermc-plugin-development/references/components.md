@@ -1,6 +1,6 @@
 # Adventure components
 
-Use this reference when producing, parsing, storing, translating, or delivering player-visible text.
+Use when producing, parsing, storing, translating, or delivering player-visible text.
 
 ## Use when
 

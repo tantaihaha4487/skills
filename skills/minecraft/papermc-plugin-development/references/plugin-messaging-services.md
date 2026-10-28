@@ -2,7 +2,7 @@
 
 ## Load this reference when
 
-Use this file for custom payloads through clients/proxies or interoperability through Bukkit's service registry. These solve different problems: messaging transports bytes over a player connection; services expose an in-process provider interface.
+Use for custom payloads via clients/proxies or Bukkit service registry interoperability. Messaging transports bytes over a player connection; services expose an in-process provider interface.
 
 ## Plugin messaging decisions
 
@@ -41,4 +41,3 @@ Test valid, malformed, oversized, unauthorized, version-mismatched, no-player, d
 - [Plugin messaging](https://docs.papermc.io/paper/dev/plugin-messaging/)
 - [Messenger Javadocs](https://jd.papermc.io/paper/org/bukkit/plugin/messaging/Messenger.html)
 - [ServicesManager Javadocs](https://jd.papermc.io/paper/org/bukkit/plugin/ServicesManager.html)
-

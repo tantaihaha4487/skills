@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -21,29 +22,39 @@ IGNORED_PARTS = {
     "out",
     "run",
 }
+TEST_SOURCE_SETS = {"test", "gametest", "integrationTest", "functionalTest"}
+TEST_SOURCE_KINDS = {"java", "kotlin", "resources"}
+
+
+def _walk_project(root: Path):
+    for current, directories, files in os.walk(root, topdown=True, followlinks=False):
+        current_path = Path(current)
+        directories[:] = sorted(
+            name
+            for name in directories
+            if name not in IGNORED_PARTS
+            and not (current_path / name).is_symlink()
+        )
+        yield current_path, directories, files
 
 
 def source_files(root: Path, name: str) -> list[Path]:
     return sorted(
         path
         for path in root.rglob(name)
-        if not any(part in IGNORED_PARTS for part in path.relative_to(root).parts)
+        if IGNORED_PARTS.isdisjoint(path.relative_to(root).parts)
     )
 
 
 def read_text(path: Path) -> str:
-    try:
-        return path.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
-        return path.read_text(encoding="utf-8", errors="replace")
+    return path.read_text(encoding="utf-8", errors="replace")
 
 
 def parse_properties(path: Path) -> dict[str, str]:
     result: dict[str, str] = {}
     if not path.is_file():
         return result
-    for raw_line in read_text(path).splitlines():
-        line = raw_line.strip()
+    for line in map(str.strip, read_text(path).splitlines()):
         if not line or line.startswith(("#", "!")):
             continue
         match = re.match(r"([^:=\s]+)\s*[:=]\s*(.*)$", line)
@@ -62,6 +73,16 @@ def first_property(properties: dict[str, str], names: Iterable[str]) -> str | No
 
 def rel(root: Path, path: Path) -> str:
     return path.relative_to(root).as_posix()
+
+
+def is_test_source_path(root: Path, path: Path) -> bool:
+    parts = path.relative_to(root).parts
+    return any(
+        source_root == "src"
+        and source_set in TEST_SOURCE_SETS
+        and source_kind in TEST_SOURCE_KINDS
+        for source_root, source_set, source_kind in zip(parts, parts[1:], parts[2:])
+    )
 
 
 def parse_manifest(root: Path, path: Path) -> dict[str, Any]:
@@ -92,16 +113,15 @@ def parse_manifest(root: Path, path: Path) -> dict[str, Any]:
 
 
 def detect_plugins(build_text: str) -> list[dict[str, str | None]]:
-    with_versions = re.findall(
+    versions_by_id = dict(re.findall(
         r"\bid\s*(?:\(\s*)?['\"]([^'\"]+)['\"]\s*\)?\s+"
         r"version\s*(?:\(\s*)?['\"]([^'\"]+)['\"]",
         build_text,
-    )
+    ))
     ids = re.findall(
         r"\bid\s*(?:\(\s*)?['\"]([^'\"]+)['\"]",
         build_text,
     )
-    versions_by_id = {plugin_id: version for plugin_id, version in with_versions}
     return [
         {"id": plugin_id, "version": versions_by_id.get(plugin_id)}
         for plugin_id in dict.fromkeys(ids)
@@ -141,49 +161,64 @@ def detect_mappings(build_text: str, properties: dict[str, str]) -> dict[str, An
 
 
 def count_files(path: Path, suffix: str | None = None) -> int:
-    if not path.is_dir():
+    if not path.is_dir() or path.is_symlink():
         return 0
     return sum(
-        1
-        for candidate in path.rglob("*")
-        if candidate.is_file() and (suffix is None or candidate.suffix == suffix)
+        candidate.is_file() and (suffix is None or candidate.suffix == suffix)
+        for current, _, files in _walk_project(path)
+        for candidate in (current / filename for filename in files)
     )
 
 
 def inspect(root: Path) -> dict[str, Any]:
+    gradle_names = (
+        "settings.gradle",
+        "settings.gradle.kts",
+        "build.gradle",
+        "build.gradle.kts",
+    )
     gradle_files = [
-        path
-        for name in ("settings.gradle", "settings.gradle.kts", "build.gradle", "build.gradle.kts")
-        if (path := root / name).is_file()
+        current / name
+        for current, _, files in _walk_project(root)
+        for name in gradle_names
+        if name in files and (current / name).is_file()
     ]
-    build_files = [path for path in gradle_files if path.name.startswith("build.gradle")]
-    build_text = "\n".join(read_text(path) for path in build_files)
+    build_text = "\n".join(
+        read_text(path) for path in gradle_files if path.name.startswith("build")
+    )
     properties = parse_properties(root / "gradle.properties")
     manifests = [parse_manifest(root, path) for path in source_files(root, "fabric.mod.json")]
 
     source_roots: list[dict[str, Any]] = []
-    for path in sorted((root / "src").glob("*/*")) if (root / "src").is_dir() else []:
-        if path.is_dir() and path.name in {"java", "kotlin", "resources"}:
-            source_roots.append(
-                {
-                    "path": rel(root, path),
-                    "kind": path.name,
-                    "files": count_files(path, ".java" if path.name == "java" else None),
-                }
-            )
-
-    java_paths = sorted(
-        path
-        for path in root.rglob("*.java")
-        if not any(part in IGNORED_PARTS for part in path.relative_to(root).parts)
+    source_root_paths = sorted(
+        current / name
+        for current, directories, _ in _walk_project(root)
+        for name in directories
+        if name in {"java", "kotlin", "resources"}
+        and (relative_parts := (current / name).relative_to(root).parts)
+        and len(relative_parts) >= 3
+        and relative_parts[-3] == "src"
     )
-    test_files = [path for path in java_paths if "test" in path.relative_to(root).parts]
+    for path in source_root_paths:
+        source_roots.append(
+            {
+                "path": rel(root, path),
+                "kind": path.name,
+                "files": count_files(path, ".java" if path.name == "java" else None),
+            }
+        )
+
+    java_paths = source_files(root, "*.java")
+    test_files = [
+        path
+        for path in java_paths + source_files(root, "*.kt")
+        if is_test_source_path(root, path)
+    ]
     mixin_configs = source_files(root, "*.mixins.json")
     widener_files = sorted(
         path
         for pattern in ("*.accesswidener", "*.classtweaker")
-        for path in root.rglob(pattern)
-        if not any(part in IGNORED_PARTS for part in path.relative_to(root).parts)
+        for path in source_files(root, pattern)
     )
 
     minecraft = first_property(properties, ("minecraft_version", "minecraftVersion"))
@@ -238,7 +273,7 @@ def inspect(root: Path) -> dict[str, Any]:
             "Client-looking classes exist in main sources without split environment source sets; inspect dedicated-server class-loading boundaries."
         )
     if not test_files:
-        advisories.append("No Java test sources were detected; rely on explicit runtime checks or add tests when justified.")
+        advisories.append("No Java or Kotlin test sources were detected; rely on explicit runtime checks or add tests when justified.")
     if any("fabric-loom" == plugin.get("id") for plugin in versions["loom_plugins"]):
         advisories.append(
             "The legacy fabric-loom plugin ID is present; preserve it for unrelated work, but consult target migration guidance before upgrading."

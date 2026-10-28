@@ -2,7 +2,7 @@
 
 ## Scope
 
-Use this reference for async I/O, computation, futures, asynchronous events, and plugin-owned
+Use for async I/O, computation, futures, asynchronous events, and plugin-owned
 shared state. Scheduler selection belongs in [scheduler.md](scheduler.md); Folia region ownership
 belongs in [folia.md](folia.md).
 

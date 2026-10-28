@@ -2,7 +2,7 @@
 
 ## Load this reference when
 
-Load this file for tick-time regressions, hot events, repeating tasks, caching, allocation-sensitive paths, database or network work, or a performance claim.
+Load for tick-time regressions, hot events, repeating tasks, caching, allocation-sensitive paths, database or network work, or a performance claim.
 
 ## Diagnose before optimizing
 

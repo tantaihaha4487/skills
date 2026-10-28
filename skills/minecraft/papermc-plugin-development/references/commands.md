@@ -1,6 +1,6 @@
 # Commands
 
-Use this reference after identifying the repository's existing command framework and exact Paper version.
+Use after identifying the repository's command framework and exact Paper version.
 
 ## Use when
 
@@ -11,7 +11,7 @@ Use this reference after identifying the repository's existing command framework
 
 - Preserve the existing command architecture unless migration is an explicit requirement.
 - For new Paper-only commands, register Brigadier trees through `LifecycleEvents.COMMANDS`.
-- For `paper-plugin.yml` plugins, prefer bootstrap lifecycle registration; otherwise use the plugin lifecycle manager.
+- For `paper-plugin.yml`, prefer bootstrap lifecycle registration; otherwise use the plugin lifecycle manager.
 - Use `BasicCommand` only for genuinely simple, free-form commands.
 - Put permissions and stable availability predicates in `.requires`.
 - Use native argument types; wrap their parsing when a custom domain value is needed.

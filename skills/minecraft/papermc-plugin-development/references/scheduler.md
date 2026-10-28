@@ -2,7 +2,7 @@
 
 ## Scope
 
-Use this reference to choose an execution context and manage scheduled work. Read
+Use to choose an execution context and manage scheduled work. Read
 [thread-safety.md](thread-safety.md) for async boundaries and [folia.md](folia.md) when the
 repository promises Folia support.
 
@@ -21,8 +21,8 @@ repository promises Folia support.
 | Server-global work with no region owner | `GlobalRegionScheduler` |
 | Blocking I/O or pure computation | `AsyncScheduler` or a plugin-owned executor |
 
-The region, entity, global, and async schedulers also work on Paper. Prefer them when one
-implementation must support Paper and Folia. Do not use a region scheduler for an entity: the
+The region, entity, global, and async schedulers also work on Paper. Prefer them for
+Paper/Folia implementations. Do not use a region scheduler for an entity: the
 entity scheduler follows the entity across regions and reports retirement.
 
 Ticks are logical game time. The target is 20 ticks per second, with 50 ms available to the
@@ -39,7 +39,7 @@ correct owner before touching game state.
   Paper documents it as critical code where entity removal, world/chunk loads, and ticket
   changes are unsafe.
 - Pass the owning plugin to scheduler APIs; do not hide ownership in unmanaged static helpers.
-- Prefer one event-driven action to a frequent polling loop when the API exposes an event.
+- Prefer one event-driven action over frequent polling when the API exposes an event.
 
 ## Hazards to reject
 

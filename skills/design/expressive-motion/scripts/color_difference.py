@@ -6,16 +6,16 @@ Independent vectorized implementation; no image registration or masking.
 import numpy as np
 
 def rgb_to_lab(rgb):
-    rgb=np.asarray(rgb,dtype=float)/255
+    rgb=np.asarray(rgb,float)/255
     linear=np.where(rgb<=.04045,rgb/12.92,((rgb+.055)/1.055)**2.4)
     xyz=linear@np.array([[.4124564,.3575761,.1804375],[.2126729,.7151522,.0721750],[.0193339,.1191920,.9503041]]).T
     scaled=xyz/np.array([.95047,1,1.08883])
     d=6/29;f=np.where(scaled>d**3,np.cbrt(scaled),scaled/(3*d*d)+4/29)
-    return np.stack([116*f[...,1]-16,500*(f[...,0]-f[...,1]),200*(f[...,1]-f[...,2])],axis=-1)
+    return np.stack([116*f[...,1]-16,500*(f[...,0]-f[...,1]),200*(f[...,1]-f[...,2])],-1)
 
 def delta_e_2000(lab1,lab2):
-    l1,a1,b1=np.moveaxis(np.asarray(lab1,dtype=float),-1,0)
-    l2,a2,b2=np.moveaxis(np.asarray(lab2,dtype=float),-1,0)
+    l1,a1,b1=np.moveaxis(np.asarray(lab1,float),-1,0)
+    l2,a2,b2=np.moveaxis(np.asarray(lab2,float),-1,0)
     c1=np.hypot(a1,b1);c2=np.hypot(a2,b2);cm=(c1+c2)/2
     g=.5*(1-np.sqrt(cm**7/(cm**7+25**7)))
     ap1=(1+g)*a1;ap2=(1+g)*a2

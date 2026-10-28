@@ -2,7 +2,7 @@
 
 ## Load this reference when
 
-Use this file for server recipe registration/discovery or client-rendered particle effects. Keep authoritative game behavior separate from presentation.
+Use for server recipe registration/discovery or client-rendered particle effects. Keep authoritative game behavior separate from presentation.
 
 ## Recipe decisions
 

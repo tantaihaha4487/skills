@@ -1,7 +1,7 @@
 // SpectrumStyle/SpectrumShaping/SpectrumItem source port. The host supplies
 // analysis bands; these functions never invent a live audio stream.
-const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
-const mix=(a,b,t)=>a+(b-a)*t;
+import {clamp,mix} from './math.mjs';
+import {compileShader,loadShaderSources,uniformFields} from './shader-utils.mjs';
 const f=Math.fround;
 export function spectrumStyle(kind='compact',height=34,wave=false){
   const s={count:6,layout:0,spacing:2.6,minimumHeight:Math.min(4,Math.max(2,height*.2)),baseLevel:.08,levelScale:.92,responseExponent:1,alignment:0,glowOpacity:.32,glowRadius:2,symmetricGradient:false,bassRangeFalloff:0,radial:false,innerRadiusRatio:.66,gapRatio:.032,haloOpacity:0,haloBlur:.035,drawsBars:true,riseDuration:.025,animationDuration:.075,inactiveOpacity:.45};
@@ -74,15 +74,41 @@ export function spectrumGeometry(width,height,levels,style,palette=[[1,61/255,13
 }
 
 export class SpectrumRenderer{
-  static async create(canvas){const fragments=await Promise.all(['spectrum_bars','spectrum_halo'].map(async name=>(await fetch(new URL(`./assets/source-shaders/${name}.frag`,import.meta.url))).text()));return new SpectrumRenderer(canvas,fragments);}
+  static async create(canvas){const fragments=await loadShaderSources(['spectrum_bars','spectrum_halo'],false);return new SpectrumRenderer(canvas,fragments);}
   constructor(canvas,fragments){
     this.canvas=canvas;this.gl=canvas.getContext('webgl2',{alpha:false,antialias:false,preserveDrawingBuffer:true});if(!this.gl)throw Error('WebGL2 unavailable');const gl=this.gl;
     const uniform=`uniform vec2 viewport;out vec2 vItem;void place(vec2 p){vItem=p;gl_Position=vec4(p.x/viewport.x*2.-1.,1.-p.y/viewport.y*2.,0,1);}`;
     const vertices=[`#version 300 es\nin vec2 position;in vec2 local;in vec4 color;in vec4 shape;out vec2 vLocal;flat out vec4 vColor;flat out vec4 vShape;${uniform}void main(){vLocal=local;vColor=color;vShape=shape;place(position);}`,`#version 300 es\nin vec2 position;in vec4 color;out vec4 vColor;${uniform}void main(){vColor=color;place(position);}`];
-    const compile=(type,text)=>{const s=gl.createShader(type);gl.shaderSource(s,text);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;};
-    this.programs=fragments.map((source,i)=>{const fragment=source.replace('#version 440','#version 300 es\nprecision highp float;').replace(/layout\(location = \d+\) (flat )?in/g,'$1in').replace(/layout\(std140, binding = 0\) uniform buf \{([\s\S]*?)\};/,(_,fields)=>fields.replace(/\/\/[^\n]*/g,'').split(';').map(x=>x.trim()).filter(Boolean).map(x=>`uniform ${x};`).join('\n'));const a=compile(gl.VERTEX_SHADER,vertices[i]),b=compile(gl.FRAGMENT_SHADER,fragment),p=gl.createProgram();gl.attachShader(p,a);gl.attachShader(p,b);gl.linkProgram(p);gl.deleteShader(a);gl.deleteShader(b);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));return p;});
-    this.uniforms=this.programs.map(p=>new Map());
-    this.vao=gl.createVertexArray();this.buffer=gl.createBuffer();this.indices=gl.createBuffer();
+    const programs=[];
+    let vao=null,buffer=null,indices=null;
+    try {
+      for(let i=0;i<fragments.length;i++){
+        const source=fragments[i],fragment=source.replace('#version 440','#version 300 es\nprecision highp float;').replace(/layout\(location = \d+\) (flat )?in/g,'$1in').replace(/layout\(std140, binding = 0\) uniform buf \{([\s\S]*?)\};/,(_,fields)=>uniformFields(fields));
+        let a=null,b=null,p=null;
+        try {
+          a=compileShader(gl,gl.VERTEX_SHADER,vertices[i]);
+          b=compileShader(gl,gl.FRAGMENT_SHADER,fragment);
+          p=gl.createProgram();gl.attachShader(p,a);gl.attachShader(p,b);gl.linkProgram(p);
+          if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));
+          const vertexShader=a;a=null;gl.deleteShader(vertexShader);
+          const fragmentShader=b;b=null;gl.deleteShader(fragmentShader);
+          programs.push(p);p=null;
+        }catch(error){
+          if(a){const shader=a;a=null;gl.deleteShader(shader);}
+          if(b){const shader=b;b=null;gl.deleteShader(shader);}
+          if(p){const program=p;p=null;gl.deleteProgram(program);}
+          throw error;
+        }
+      }
+      vao=gl.createVertexArray();buffer=gl.createBuffer();indices=gl.createBuffer();
+      this.programs=programs;this.uniforms=programs.map(()=>new Map());this.vao=vao;this.buffer=buffer;this.indices=indices;
+    }catch(error){
+      if(indices){const value=indices;indices=null;gl.deleteBuffer(value);}
+      if(buffer){const value=buffer;buffer=null;gl.deleteBuffer(value);}
+      if(vao){const value=vao;vao=null;gl.deleteVertexArray(value);}
+      programs.forEach(program=>gl.deleteProgram(program));
+      throw error;
+    }
   }
   render({width,height,levels,kind='compact',wave=false,palette,cut=[0,0,0,0],cutWave=[0,0,0,0]}){
     if(this.disposed)return;const s=spectrumStyle(kind,height,wave),mesh=spectrumGeometry(width,height,levels,s,palette),gl=this.gl;if(this.canvas.width!==width)this.canvas.width=width;if(this.canvas.height!==height)this.canvas.height=height;gl.viewport(0,0,width,height);gl.disable(gl.DITHER);gl.clearColor(18/255,18/255,18/255,1);gl.clear(gl.COLOR_BUFFER_BIT);gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);gl.bindVertexArray(this.vao);

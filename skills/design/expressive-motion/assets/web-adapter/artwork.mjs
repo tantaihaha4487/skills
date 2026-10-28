@@ -1,3 +1,6 @@
+import {hash32 as fallbackSeed} from './hash.mjs';
+import {clamp} from './math.mjs';
+
 // Deterministic browser port of src/artwork/PlaylistCovers.cpp::fallback.
 // This is intentionally a local rendering helper: it never fetches artwork or
 // derives a provider identity from a process seeded hash.
@@ -11,15 +14,8 @@ const PALETTES = Object.freeze([
   { dark: '#453849', light: '#eae0eb', shape: '#c3acd1', ribbon: '#a6c7b8', accent: '#eed29d' },
 ]);
 
-const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
-
 /** FNV-1a over UTF-8, matching the C++ fallback byte-for-byte. */
-export function fallbackSeed(key) {
-  const bytes = new TextEncoder().encode(String(key ?? ''));
-  let seed = 2166136261;
-  for (const byte of bytes) seed = Math.imul(seed ^ byte, 16777619) >>> 0;
-  return seed >>> 0;
-}
+export {fallbackSeed};
 
 export function fallbackSpec(key, dark = true) {
   const seed = fallbackSeed(key);
@@ -147,10 +143,11 @@ export function renderFallback(key, dark = true, edge = 256) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 
   const pixels = ctx.getImageData(0, 0, size, size);
+  const xSeeds = Array.from({length:size},(_,x)=>(Math.floor(x*256/size)*374761393)>>>0);
   for (let y = 0; y < size; y += 1) {
+    const ySeed = (Math.floor(y * 256 / size) * 668265263) >>> 0;
     for (let x = 0; x < size; x += 1) {
-      let grain = ((Math.floor(x * 256 / size) * 374761393) >>> 0)
-        + ((Math.floor(y * 256 / size) * 668265263) >>> 0) + spec.seed;
+      let grain = xSeeds[x] + ySeed + spec.seed;
       grain = Math.imul((grain ^ (grain >>> 13)) >>> 0, 1274126177) >>> 0;
       const delta = ((grain >>> 24) % 5) - 2;
       const at = (y * size + x) * 4;
@@ -165,8 +162,9 @@ export function renderFallback(key, dark = true, edge = 256) {
 
 const cache = new Map();
 export function fallbackDataUrl(key, dark = true, edge = 256) {
-  const cacheKey = `${dark ? 'dark' : 'light'}:${String(key ?? '')}:${edge}`;
-  if (!cache.has(cacheKey)) cache.set(cacheKey, renderFallback(key, dark, edge));
+  const size = Math.max(1, Math.round(edge));
+  const cacheKey = `${dark ? 'dark' : 'light'}:${String(key ?? '')}:${size}`;
+  if (!cache.has(cacheKey)) cache.set(cacheKey, renderFallback(key, dark, size));
   return cache.get(cacheKey);
 }
 

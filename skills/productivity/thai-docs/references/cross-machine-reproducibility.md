@@ -1,0 +1,3 @@
+# Cross-machine reproducibility
+
+For cross-machine semantic parity, pin or record Python, `python-docx`, the DOCX renderer/converter, Poppler, and Thai font family/file hash. Keep source Markdown and generator deterministic; use explicit locale/UTF-8, stable sorting, explicit output paths, and no content timestamps. The bundled checker records artifact hashes and page geometry but cannot promise pixel-identical pagination across renderer/font builds. If environments differ, classify result as `PASS WITH LIMITATIONS` and report exact differences. If requested font is unavailable, stop and ask before generating; never silently substitute or claim byte-identical output.

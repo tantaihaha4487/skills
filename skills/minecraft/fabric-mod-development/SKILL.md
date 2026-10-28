@@ -7,7 +7,7 @@ description: Analyze, implement, debug, test, and migrate Fabric Minecraft mods 
 
 ## Overview
 
-Make maintainable changes to unfamiliar Fabric repositories without guessing APIs or crossing client/server boundaries. Treat the repository and its resolved dependency versions as evidence, then use matching official documentation and Javadocs to choose an extension point.
+Make maintainable changes; never guess APIs or cross client/server boundaries. Use repository and resolved dependency versions as evidence, plus matching official docs/Javadocs to choose an extension point.
 
 ## Mandatory Workflow
 
@@ -15,14 +15,14 @@ Follow this sequence without skipping ahead:
 
 **Understand → Analyze → Plan → Implement → Validate → Summarize**
 
-Do not edit code until the Understand and Analyze evidence is sufficient to name the affected lifecycle, logical side, existing convention, and exact API version.
+Before editing, require Understand and Analyze evidence to identify the affected lifecycle, logical side, project convention, and exact API version.
 
 ### 1. Understand the Repository
 
-1. Read repository instructions, contributor documentation, and the current request.
+1. Read repository instructions, contributor docs, and the request.
 2. Inspect working-tree status. Preserve unrelated and user-authored changes.
 3. Run `python scripts/inspect_fabric_project.py <project-root>` from this skill directory when available.
-4. Inspect, rather than merely list:
+4. Inspect rather than list:
    - Gradle settings, wrapper, plugins, properties, repositories, dependencies, source sets, run configurations, and publishing tasks.
    - Every source `fabric.mod.json`, including environment, entrypoints, dependencies, mixins, class tweaker/access widener, and custom lifecycle metadata.
    - Common, client, server, test, game-test, datagen, generated-resource, and resource-pack/data-pack roots.
@@ -30,13 +30,13 @@ Do not edit code until the Understand and Analyze evidence is sufficient to name
 5. Find the nearest analogous feature and trace its complete path from initialization through runtime behavior and resources.
 6. Record a version contract: Minecraft version, Java version, mapping namespace, Loader, Loom, Fabric API, relevant third-party modules, and physical/logical side.
 
-If any version is indirect, resolve it from the Gradle model, lock/catalog, or dependency report. Do not infer it from package names or memory.
+Resolve indirect versions from the Gradle model, lock/catalog, or dependency report; never infer them from package names or memory.
 
 ### 2. Analyze Before Planning
 
 Build an evidence-backed change model:
 
-- Identify the owner of state and the lifecycle point that creates, mutates, synchronizes, saves, and disposes it.
+- Identify the state owner and lifecycle point that creates, mutates, synchronizes, saves, and disposes it.
 - Separate physical environment from logical side. The logical server owns authoritative game state, including in single-player.
 - Mark every client-only type and ensure common code cannot load it on a dedicated server.
 - Determine which files are source-authored and which are generated.
@@ -57,19 +57,19 @@ Read [architecture.md](references/architecture.md) for lifecycle and side analys
 
 ### 3. Plan
 
-State the intended behavior, files, initialization path, side/thread ownership, compatibility risks, and validation commands. Include resource or generated-output changes. Keep the plan no broader than the request.
+State behavior, files, initialization path, side/thread ownership, compatibility risks, validation commands, and resource/generated-output changes. Keep the plan within scope.
 
-For risky or ambiguous behavior, establish a failing reproduction or test first. If the API cannot be verified for the version contract, pause implementation and report what evidence is missing.
+For risky or ambiguous behavior, establish a failing reproduction or test first. If the API cannot be verified for the version contract, pause implementation and report missing evidence.
 
 ### 4. Implement
 
 - Make the smallest coherent change and follow repository naming, packaging, formatting, and initialization conventions.
-- Keep bootstrap code declarative: register objects, callbacks, payload types, and providers; do runtime work in the appropriate callback.
-- Use namespaced identifiers and explicit initialization paths. Do not depend accidentally on class loading.
+- Keep bootstrap declarative: register objects, callbacks, payload types, and providers; perform runtime work in the appropriate callback.
+- Use namespaced identifiers and explicit initialization paths; never depend on accidental class loading.
 - Keep client-only entrypoints, renderers, screens, key bindings, and client receivers in client source sets when the project supports split sources.
 - Validate all client-to-server input and mutate game state on the logical server.
 - Schedule mutations onto the game thread when callback documentation does not guarantee it.
-- Prefer data-driven resources and datagen where the project does. Regenerate outputs rather than hand-editing generated files.
+- Prefer data-driven resources and datagen where the project does; regenerate outputs instead of hand-editing generated files.
 - Preserve other mods' behavior: compose through events and resource mechanisms instead of replacing global behavior.
 - Keep Mixins narrow, uniquely named, documented by missing hook, and free of copied vanilla logic when an injection suffices.
 
@@ -77,8 +77,9 @@ Load only task-relevant references:
 
 | Task | Reference |
 | --- | --- |
-| Build, source layout, manifest, datagen | [project-workflow.md](references/project-workflow.md) |
+| Build/source layout, manifest, datagen | [project-workflow.md](references/project-workflow.md) |
 | Items, blocks, entities, resources, state, config | [content-and-data.md](references/content-and-data.md) |
+| Blocks and creative inventory | [content-and-data.md](references/content-and-data.md) + [extension-points.md](references/extension-points.md) |
 | Packets, synchronization, authority | [networking.md](references/networking.md) |
 | Client-only code and rendering | [client-rendering.md](references/client-rendering.md) |
 | Tests, diagnosis, production artifact, release | [testing-debugging-release.md](references/testing-debugging-release.md) |
@@ -88,51 +89,29 @@ Load only task-relevant references:
 
 ### 5. Validate in Risk Order
 
-Use the repository's wrapper and existing tasks. Do not assume task names when Gradle can list them.
+Use the repository wrapper and existing tasks; list Gradle tasks instead of assuming names.
 
 1. Run the narrowest relevant unit or compilation check.
 2. Run format/static analysis configured by the repository.
-3. Run datagen when providers or generated resources changed; inspect the generated diff.
+3. Run datagen when providers or generated resources changed; inspect generated diff.
 4. Run unit tests and applicable server/client game tests.
 5. Run the full build and inspect the production JAR's manifest, entrypoints, mixins, class tweaker/access widener, and resources when packaging changed.
-6. Exercise the affected environment: dedicated server for common/server work, physical client and integrated server for client or cross-side work.
+6. Exercise affected environments: dedicated server for common/server or cross-side work; physical client and integrated server for client/cross-side work.
 7. Review the final diff for unintended generated files, stale resources, duplicate registration, client leakage, and unrelated changes.
 
-Do not claim a runtime path was tested if only compilation succeeded. Explain any check that could not run.
+Do not claim runtime paths were tested based on compilation alone; explain checks that could not run.
 
-## Debugging Workflow
+## Debugging and migration
 
-1. Reproduce with the smallest relevant run configuration and capture the full crash report or `latest.log` context.
-2. Classify the failure: version/mapping mismatch, initialization order, registry/resource error, physical-side class loading, logical-side authority, wrong thread, Mixin application, packet registration, stale generated data, or dependency conflict.
-3. Trace the first project-owned frame and verify its API against the resolved dependency, not current documentation by default.
-4. Reduce to one hypothesis; add targeted logging, breakpoint, assertion, or test.
-5. Fix the cause, remove temporary diagnostics, and rerun the failing path plus the nearest regression check.
+For failures, reproduce the smallest case, classify it, trace the first project-owned frame against resolved dependencies, test one hypothesis, then rerun the failing path and nearest regression check. Read `references/testing-debugging-release.md` for symptom routing and evidence.
 
-Use [testing-debugging-release.md](references/testing-debugging-release.md) for symptom routing.
+For version ports, read `references/versions-and-migrations.md`. Keep build contract, names/signatures, behavior, and validation separate; never mix source and target mapping names. Remove temporary diagnostics and rerun the regression path.
 
-## Migration Workflow
-
-Treat migration as four explicit passes:
-
-1. Build contract: wrapper, Java, Loom, Loader, Fabric API, dependencies, and repositories.
-2. Names and signatures: target mapping namespace, official migration guide, compiler failures, and deprecated replacements.
-3. Behavior: lifecycle, networking, rendering, registries, persistence, resources, and side assumptions.
-4. Validation: datagen, tests, dedicated server, client/integrated server, and production JAR.
-
-Do not combine source and target mapping names. Upgrade in reviewable stages and keep mechanical renames separate from behavior changes where practical. The 1.21.11-to-26.1 transition changes obfuscation, mappings, Loom configuration, and Java requirements; always read [versions-and-migrations.md](references/versions-and-migrations.md) before crossing it.
-
-## Behavioral Examples
-
-- **Add a block:** first find the repository's block/item holders, identifier helper, creative-tab event, datagen providers, and initializer call; then mirror that path and validate generated assets and both runtime sides.
-- **Fix a packet bug:** verify payload registration on both physical sides, receiver placement, logical-server validation, and game-thread mutation before changing the codec or handler.
-- **Port a renderer:** lock the target Minecraft/Fabric versions, read the matching rendering migration notes, keep client code isolated, and validate extraction/draw phases in a client run.
+For block additions, check the creative inventory callback in `references/extension-points.md`; packet and renderer requests use task-specific routes above.
 
 ## Important Rules
 
-- Prefer exact-version official documentation, official examples on the matching branch/tag, resolved Javadocs/source, migration guides, and changelogs—in that order. Community examples are leads, not authority.
-- If official guidance conflicts with community code, follow the official source and record the discrepancy when it affects the result.
-- Existing project style governs structure, but it cannot make a removed, internal, or wrong-version API valid.
-- Never use Fabric implementation packages as public API unless the repository deliberately accepts that coupling and the task requires it.
-- Never suppress deprecation or experimental warnings without documenting why the risk is acceptable.
-- Never add a dependency, repository, global hook, Mixin, or duplicated utility when an existing supported path solves the task.
-- Summarize changed behavior, architectural fit, validation evidence, and remaining risks—not a diary of edits.
+- Use exact-version official sources; record conflicts; local style cannot justify removed, internal, or wrong-version APIs.
+- Keep Fabric implementation packages out of public APIs unless the task requires it and the repository accepts that coupling; never suppress deprecation/experimental warnings without documenting acceptable risk.
+- Do not add dependencies, repositories, global hooks, Mixins, or duplicated utilities when an existing supported path solves the task.
+- Summarize changed behavior, architectural fit, validation evidence, and remaining risks.

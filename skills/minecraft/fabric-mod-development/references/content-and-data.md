@@ -1,6 +1,6 @@
 # Content, Resources, Persistence, and Configuration
 
-Use this reference for registry-backed content, data-driven resources, durable state, item state, codecs, and project configuration.
+Use for registry-backed content, data-driven resources, durable state, item state, codecs, and project configuration.
 
 ## Content Change Checklist
 
@@ -9,12 +9,12 @@ Trace every new content type through:
 1. namespaced identifier and registry holder;
 2. explicit initializer reachability;
 3. common/server behavior;
-4. client representation such as model, color provider, screen, or renderer;
+4. client representation: model, color provider, screen, or renderer;
 5. assets and data: translation, model, blockstate, loot, recipe, tag, advancement, or component defaults;
-6. datagen provider when the project generates that resource;
-7. tests or a focused client/server run.
+6. datagen provider when generating that resource;
+7. tests or focused client/server run.
 
-Use tags and data resources for membership or tunable behavior instead of hard-coded lists when datapacks should be able to participate.
+Use tags and data resources, not hard-coded lists, for membership or tunable behavior when datapacks may participate.
 
 ## State Mechanism Selection
 
@@ -30,15 +30,15 @@ Do not store per-world or per-player state in unbounded global static collection
 
 ### Data Components
 
-Modern item state belongs in components rather than ad hoc raw stack NBT. Reuse vanilla components when their semantics match. A custom component should be a small immutable value with explicit equality and serialization. Copy-on-write updates avoid invisible in-place mutation.
+Modern item state belongs in components, not ad hoc raw stack NBT. Reuse vanilla components with matching semantics. Custom components should be small immutable values with explicit equality/serialization. Copy-on-write avoids invisible in-place mutation.
 
 ### Data Attachments
 
-The Fabric Data Attachment API is experimental in relevant 1.21.x Fabric API releases. Confirm the target module lifecycle before adopting it. Persisted or synced attachments require codecs, and in-place mutation can bypass change detection; replace values through attachment APIs.
+The Fabric Data Attachment API is experimental in relevant 1.21.x Fabric API releases. Confirm target module lifecycle before adoption. Persisted or synced attachments require codecs; in-place mutation can bypass change detection; replace values through attachment APIs.
 
 ### Saved Data
 
-Choose the narrowest storage scope. Stable keys prevent duplicate stores. Codecs should tolerate older data through optional/default fields when compatible. Forgetting `setDirty()` can make correct in-memory behavior disappear after restart.
+Choose the narrowest storage scope. Stable keys prevent duplicate stores. Codecs should tolerate compatible older data via optional/default fields. Forgetting `setDirty()` can make correct in-memory behavior disappear after restart.
 
 ## Codec Discipline
 
@@ -51,7 +51,7 @@ Choose the narrowest storage scope. Stable keys prevent duplicate stores. Codecs
 
 ## Configuration
 
-Do not assume a universal Fabric configuration API. Inspect dependencies and local conventions first, then reuse the existing config library, screen integration, path, serializer, defaults, and reload policy. If none exists, justify whether a config is needed before adding a dependency.
+Do not assume a universal Fabric configuration API. Inspect dependencies and local conventions, then reuse the existing config library, screen integration, path, serializer, defaults, and reload policy. If none exists, justify whether a config is needed before adding a dependency.
 
 For a simple project-owned file, obtain the directory from `FabricLoader.getInstance().getConfigDir()`, use an established serializer/codec, write atomically, preserve unknown or older fields when appropriate, and define whether changes require restart. Never expose secrets in logs or commit machine-local config.
 

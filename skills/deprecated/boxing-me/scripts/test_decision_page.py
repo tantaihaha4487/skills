@@ -200,6 +200,17 @@ class DecisionPageTests(unittest.TestCase):
                 server.server_close()
                 thread.join(timeout=2)
 
+    def test_generated_any_readiness(self):
+        node = shutil.which("node")
+        if not node:
+            self.skipTest("node unavailable")
+        page = decision_page.render_html(SPEC)
+        script = page.split("<script>", 1)[1].split("</script>", 1)[0]
+        source = script[script.index("function conditionReady"):script.index("function conditionMatches")]
+        probe = source + 'const active=new Set(["mode"]);if(!conditionReady(["any",["mode","safe"],["hidden","x"]],active)||conditionReady(["all",["mode","safe"],["hidden","x"]],active))throw new Error("condition readiness");'
+        result = subprocess.run([node, "-"], input=probe, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

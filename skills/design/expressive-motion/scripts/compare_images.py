@@ -15,7 +15,7 @@ def blur(a):
     return np.tensordot(np.lib.stride_tricks.sliding_window_view(a,11,axis=1),kernel,axes=(-1,0))
 
 def metrics(a,b):
-    a=np.asarray(a,dtype=float);b=np.asarray(b,dtype=float)
+    a=np.asarray(a,float);b=np.asarray(b,float)
     if a.shape!=b.shape or a.ndim!=3 or a.shape[2]!=3:raise ValueError('Require equal RGB image sizes; never rescale an oracle')
     if min(a.shape[:2])<11:raise ValueError('ROI must be at least11px in both dimensions')
     ma,mb=blur(a),blur(b)
@@ -30,7 +30,7 @@ def metrics(a,b):
             'size':[a.shape[1],a.shape[0]],'ssim_gate':bool(score.mean()>=.98)}
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('source',type=Path);p.add_argument('candidate',type=Path);p.add_argument('--output',type=Path,required=True);p.add_argument('--preview',type=Path);p.add_argument('--color-roi',action='append',default=[],help='Separate stable color rectangle x,y,w,h; full SSIM remains unmasked');args=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('source',type=Path);p.add_argument('candidate',type=Path);p.add_argument('--output',type=Path,required=True);p.add_argument('--preview',type=Path);p.add_argument('--color-roi',action='append',default=[],help='Separate stable color rectangle x,y,w,h; full SSIM remains unmasked');p.add_argument('--quiet',action='store_true',help='Print only a JSON-quoted result path; persist complete JSON evidence');args=p.parse_args()
     a=Image.open(args.source).convert('RGB');b=Image.open(args.candidate).convert('RGB')
     result=metrics(a,b);result.update(source=str(args.source),candidate=str(args.candidate),method=__doc__.strip())
     result['stable_color_rois']=[]
@@ -47,5 +47,8 @@ def main():
         for i,(name,im) in enumerate([('Qt source',a),('Web rendered',b),('Abs difference x4',heat)]):
             draw.text((i*w+5,7),name,fill='white');out.paste(im,(i*w,28))
         out.resize((w*6,(h+28)*2)).save(args.preview)
-    print(json.dumps(result))
+    if args.quiet:
+        print(json.dumps(str(args.output.resolve()),ensure_ascii=False))
+    else:
+        print(json.dumps(result))
 if __name__=='__main__':main()

@@ -10,7 +10,7 @@ metadata:
 
 # Thai documents: create, audit, and verify
 
-Use this single skill for Thai essays, reports, academic audits, DOCX/PDF creation, citation-marker edits, and final artifact verification.
+Use for Thai essays, reports, academic audits, DOCX/PDF creation, citation-marker edits, and final artifact verification.
 
 ## Operating contract
 
@@ -18,15 +18,14 @@ Use this single skill for Thai essays, reports, academic audits, DOCX/PDF creati
 - Preserve the original; create a derived output unless the user explicitly requests a verified in-place edit.
 - Separate source-backed facts, author synthesis, proposed criteria, assignment requirements, and unknowns.
 - Never invent citations, authors, dates, DOI, measurements, commands, or successful checks.
-- For Hermes behavior, use `https://hermes-agent.nousresearch.com/docs` as the authoritative source and load `hermes-agent` first.
-- Use `PASS`, `PASS WITH LIMITATIONS`, or `BLOCKED` as the final qualification status.
+- For Hermes behavior, consult `https://hermes-agent.nousresearch.com/docs` directly.
 - Never claim PASS when a required artifact or check was skipped. Report the exact limitation or blocker.
 
 ## Portable environment discovery
 
-Do not use machine-specific absolute paths from this skill. Resolve tools at runtime with `shutil.which` or equivalent. Accept explicit paths from the user. Use a temporary working directory for renders and manifests. Discover fonts with `fc-match`/`fc-list` and inspect the bundled fonts; use the requested family and report a limitation if unavailable. When no family is specified, use the default below. Do not silently substitute a different family for an explicit font requirement.
+Do not use machine-specific absolute paths from this skill. Resolve tools at runtime with `shutil.which` or equivalent; accept explicit user paths. Use a temporary directory for renders/manifests. Discover fonts with `fc-match`/`fc-list` and inspect the bundled fonts. If an explicit family is unavailable, stop and ask; never silently substitute. Without a specified family, follow the applicable template or default below.
 
-Useful tools depend on the task:
+Useful tools:
 
 - Python 3 with `python-docx` for DOCX creation/inspection.
 - A real DOCX renderer for page layout and DOCX→PDF conversion. Prefer LibreOffice when available. If it is absent, try an installed Microsoft Word automation path or another DOCX-capable converter that preserves the selected Thai font and document fields. Verify the alternative's output with the same PDF and visual checks; a text extractor or `python-docx` is not a page renderer. The `documents` skill's `render_docx.py` uses LibreOffice and is not an independent fallback.
@@ -39,11 +38,11 @@ If the preferred executable is absent, discover the equivalent capability before
 
 Before creating or restructuring a document, read [references/document-structure-and-layout.md](references/document-structure-and-layout.md). Choose the essay, report, or official-document guidance according to the requested deliverable. For a formatting-only edit, preserve content and section order.
 
-For Thai government correspondence, read [references/government-correspondence-layout.md](references/government-correspondence-layout.md) for the external-letter (`หนังสือภายนอก`) rules and source scope. For an internal memorandum (`บันทึกข้อความ`, form `แบบที่ ๒๙`), also read [references/internal-government-memo-layout.md](references/internal-government-memo-layout.md). Apply each profile only to its document type, subject to explicit user requirements and any supplied, applicable institutional form. Do not transfer their heading, margin, or signature rules to essays and reports.
+For Thai government correspondence, read the [external-letter profile](references/government-correspondence-layout.md) for `หนังสือภายนอก` and the [internal-memo profile](references/internal-government-memo-layout.md) for `บันทึกข้อความ` (form `แบบที่ ๒๙`). Apply each only to its document type; explicit requirements and applicable supplied forms take precedence. Do not transfer their rules to essays or reports.
 
-Resolve layout choices in this order: explicit user requirements, supplied institutional template or exemplar, existing document styles for edits, then the defaults below. Record the chosen values once and reuse them throughout generation and review. Ask only about missing requirements that materially affect the result, such as a mandatory page limit or institutional template.
+Resolve choices in order: explicit requirements, mandatory templates, existing edit styles, then defaults. If requirements conflict with a mandatory template, ask before generating; otherwise follow the applicable template or exemplar before existing styles/defaults. Record choices once; ask only about unresolved material requirements such as a page limit.
 
-For general reports without a required institutional format, read [references/compact-report-example.md](references/compact-report-example.md) and use its **Current preferred report layout** with the measured body rhythm. The later user preferences supersede the older measured heading/list/table values. For an existing report, apply this profile when creation or restyling is in scope; preserve the existing layout for a content-only edit. Keep essay and official-document profiles separate.
+For general report creation or restyling without a required institutional format, read [references/compact-report-example.md](references/compact-report-example.md) and use its **Current preferred report layout** with measured body rhythm. For content-only edits, preserve the existing layout. Keep essay and official-document profiles separate.
 
 ## Default formal Thai profile
 
@@ -51,7 +50,7 @@ These are fallback design choices, not a universal Thai institutional standard. 
 
 - Paper: A4, 21 × 29.7 cm.
 - Margins: top/bottom 2.54 cm and left/right 2.54 cm by default. A supplied exemplar or institutional requirement can override these; the government-correspondence references specify an asymmetric 3.00 cm left / 2.00 cm right layout for those forms.
-- Document font: `TH SarabunPSK` is the user's selected default. Use one family throughout the document, including title, headings, body, tables, captions, bibliography, headers, footers, and page fields. Use `TH SarabunIT๙` instead when the user selects it. If the choice is unresolved or a template conflicts with this preference, ask the user to choose before generating; do not mix the two families or silently substitute one. An already explicit choice does not need reconfirmation. Thai digits alone do not require changing the family; verify glyph coverage.
+- Document font: default to `TH SarabunPSK`; use `TH SarabunIT๙` when explicitly selected. An applicable template supplies the family when none is specified. Keep one family throughout all text and styles. If an explicit family conflicts with a mandatory template or is unavailable, ask before generating; never silently substitute. Thai digits alone do not require changing the family; verify glyph coverage.
 - Body size: 16 pt unless the institutional template specifies another size.
 - Title: centered, black, bold, normally 18 pt. Use 20–22 pt only when the exemplar or document hierarchy requires it.
 - Headings: black, bold, left-aligned; use semantic Heading styles and a consistent hierarchy. Preserve the selected numbering scheme when sections are numbered. Essays normally have a title and unlabelled body paragraphs.
@@ -61,15 +60,11 @@ These are fallback design choices, not a universal Thai institutional standard. 
 - Header/footer: preserve official identifiers, document title, revision/date fields, and page numbers when present. Keep author/student metadata in the footer only when requested.
 - Avoid emoji, informal slang, visible drafting labels, Markdown markers, and decorative theme colors in formal Thai documents.
 
-When a supplied DOCX or PDF exemplar exists, inspect it first and let measurable exemplar properties override these defaults.
+Inspect supplied DOCX/PDF exemplars first; let measurable properties override these defaults.
 
 ## Bundled official Thai font set
 
-The bundled font files were obtained from the Ubon Ratchathani University source URL:
-
-`https://www.ubs.ubu.ac.th/font/THSarabun.rar`
-
-Fonts are grouped by family under `assets/fonts/`: `THSarabunNew/`, `THSarabunIT9/`, `THNiramit/`, and the separately sourced `THSarabunPSK/`. The original installation guide is under `assets/guides/`. See [references/font-source.md](references/font-source.md) for provenance and internal family names. Retain the source URL and archive hash. Use only the font family and face verified by metadata; directory names do not override internal font metadata.
+Bundled fonts are under `assets/fonts/`, with the original installation guide under `assets/guides/`. When using one, read [references/font-source.md](references/font-source.md) for the source URL, archive hash, and verified family names. Use only metadata-verified faces; directory names do not override internal metadata.
 
 Before using a bundled font:
 
@@ -93,23 +88,7 @@ In addition to the general gates below, probe the final artifacts for:
 
 ## Workflow A — audit an existing report
 
-1. Record source path, requested scope, language/register, layout constraints, citation rules, and conclusions that must remain conditional.
-2. Read the complete source with line numbers. Inventory headings, paragraphs, tables, figures/captions, Q&A, checklists, and bibliography.
-3. Build a structure and evidence map. A citation marker, URL, or bibliography entry is not proof that a claim is supported.
-4. Mark repeated thesis statements, prompt-like framing, answer-key language, oversized tables, duplicated mechanisms, and flowcharts that repeat prose.
-5. Inspect cited primary sources when accessible. Narrow site-specific findings; distinguish measured findings from recommendations and proposed operational thresholds.
-6. Produce a concrete old-section→new-section map and paragraph-level actions: keep, merge, move, shorten, rename, or remove.
-7. Preserve important caveats, the requested conclusion, and the requested document format.
-8. State whether the audit is `PASS`, `PASS WITH LIMITATIONS`, or `BLOCKED`. An audit is read-only unless editing was explicitly requested.
-
-Recommended audit headings in Thai:
-
-1. ผลตรวจโดยรวม
-2. แผนผังส่วนใหม่
-3. ข้อเสนอแก้ระดับย่อหน้า
-4. จุดซ้ำและวัสดุแบบใบงาน
-5. ความเสี่ยงด้านการอ้างอิง
-6. ไฟล์และสถานะการแก้ไข
+For an existing-report audit, read [references/report-audit-workflow.md](references/report-audit-workflow.md).
 
 ## Workflow B — create or edit Thai DOCX/PDF
 
@@ -118,60 +97,56 @@ Recommended audit headings in Thai:
 - Define the requested profile before generating: A4, margins, font family, body size, line spacing, title, headings, tables, figures, bibliography, and whether a cover/TOC is required.
 - Keep final body text clean: no prompt labels, Markdown markers, reviewer notes, or role-play unless explicitly requested.
 - For formal reports, use evidence→interpretation→decision. Label monitoring thresholds, stop criteria, and success criteria as author-proposed unless an inspected source defines them.
-- For an explicit “remove all” request such as `.[2][14]`, remove `\[\d+\]` markers from the requested scope, including bibliography labels when “all” is stated. Preserve dates, years, measurements, percentages, ranges, section numbers, and chemical notation. Rebuild and verify both artifacts.
+- For bracketed numeric-citation removal, read [references/numeric-citation-marker-removal-and-verification.md](references/numeric-citation-marker-removal-and-verification.md) and apply its scope and verification rules.
 
 ### Apply the selected layout
 
-Use the selected profile above and the structure/layout reference; do not introduce a second set of defaults. Define reusable Title, Heading, Normal, Caption, and table/reference styles as needed. Set paragraph spacing and indentation through styles rather than empty paragraphs, spaces, or tabs. Apply the font bindings from the bundled-font section to generated text, including tables, headers, and footers. Remove inherited theme borders/colors when a plain black academic style is requested.
+Use the selected profile and structure/layout reference; do not add a second set of defaults. Define reusable Title, Heading, Normal, Caption, and table/reference styles as needed. Set paragraph spacing and indentation through styles rather than empty paragraphs, spaces, or tabs. Apply the bundled-font bindings to text, tables, headers and footers. Remove inherited theme borders/colors when a plain black academic style is requested.
 
-For edits, modify the existing document when practical; rebuilding from extracted text can discard numbering, fields, section breaks, and other layout information.
+Rebuilding from extracted text can discard numbering, fields, section breaks, and other layout information.
 
 ### Build and export gates
 
-1. For new documents, build from source-of-truth Markdown or structured input with a deterministic generator. For existing documents, retain their structure and change only the requested content or formatting in the derived copy.
+1. For new documents, build from source-of-truth Markdown or structured input with a deterministic generator. For existing documents, retain their structure and change only requested content or formatting in the derived copy.
 2. Validate the DOCX package and inspect OOXML for A4 dimensions, margins, headings, tables, figures, footer PAGE fields, font bindings, and forbidden draft markers.
 3. Render the exact output DOCX with an available DOCX-capable engine, using an explicit output directory. Record the engine and version. Prefer LibreOffice when installed; if unavailable, verify that the alternative preserves Thai text, fonts, fields, tables, and page geometry before relying on it.
 4. Inspect the exact PDF with `pdfinfo`, `pdffonts`, and `pdftotext`.
 5. Render every PDF page and create a contact sheet. Inspect all pages for balance, unexpected blanks, and section flow. Inspect the first page, changed pages, dense tables, every figure/caption pair, appendix, and final bibliography page at readable resolution. Correct layout defects using the reference's pagination guidance, then export and review again.
-6. Maintain an internal evidence manifest with source/output paths, tool versions when relevant, validation output, PDF geometry/page count, font result, text probes, citation probes, render coverage, visual-review scope, and hashes when integrity matters. Redact secrets. Give the user the finished document by default; surface the manifest only when requested or when a specific limitation affects use of the result.
+6. Maintain an internal evidence manifest with source/output paths, relevant tool versions, validation output, PDF geometry/page count, font result, text probes, citation probes, render coverage, visual-review scope, and hashes when integrity matters. Redact secrets. Give the user the finished document by default; surface the manifest only when requested or when a specific limitation affects use of the result.
 7. After every substantive edit, rerun all applicable gates. Do not carry forward a previous PASS.
 
 ## Cross-machine reproducibility
 
-For the same semantic result on another machine, pin or record Python, `python-docx`, the DOCX renderer/converter, Poppler, and Thai font family/file hash. Keep source Markdown and generator deterministic, use explicit locale/UTF-8, stable sorting, explicit output paths, and no timestamps in content. The bundled checker records artifact hashes and page geometry but cannot promise pixel-identical pagination across renderer/font builds. If the environment differs or a requested font is unavailable, classify the result as `PASS WITH LIMITATIONS` and report the exact difference; never silently substitute a font or claim byte-identical output.
+For portability or another-machine parity, read [references/cross-machine-reproducibility.md](references/cross-machine-reproducibility.md). Never claim pixel-identical output across different renderer or font builds.
 
 ## Qualification status
 
-- **PASS** — requested artifacts exist and all applicable DOCX, PDF, text, font, and visual checks passed.
-- **PASS WITH LIMITATIONS** — artifacts pass available checks, but a named limitation remains, such as no Microsoft Word cross-check, unavailable original source, unavailable metadata, or representative rather than independent visual review.
-- **BLOCKED** — a required source, requested artifact, conversion, validation, or visual check failed or was not possible after checking available alternatives.
+Treat user-requested or workflow-required checks as required.
+
+- **PASS** — every requested artifact and required check passed, with no unresolved limitation.
+- **PASS WITH LIMITATIONS** — requested artifacts exist, but a non-required renderer or explicitly waived check remains unavailable; name the limitation.
+- **BLOCKED** — a requested artifact, required source, conversion, validation, or visual check failed or remains unavailable after checking alternatives.
 
 ## Portable verification command
 
 Use the bundled checker after producing a DOCX/PDF pair:
 
 ```bash
-python scripts/verify_thai_docs.py --docx output.docx --pdf output.pdf --render-dir /tmp/thai-docs-render
+python scripts/verify_thai_docs.py --docx output.docx --pdf output.pdf --render-dir render
 ```
 
-The checker exits nonzero for a failed required check, emits JSON evidence, and never assumes a fixed home directory. Use `--required-font FAMILY` when a font requirement is explicit and `--forbid-numeric-markers` only when the task requires removing those markers. It renders into a fresh subdirectory of `--render-dir` and reports that path. Its PASS covers automated checks only; inspect the page images before claiming visual PASS. When no converter is available for a DOCX-only task, omit `--pdf` for a structural `PASS WITH LIMITATIONS` result.
+The checker emits JSON with `checks.visual_review="UNVERIFIED"` and exits nonzero on required-check failure. Use `--allow-landscape` only for intentional A4 landscape/mixed sections; non-A4 still fails. Use `--required-font FAMILY` only for explicit font requirements and `--forbid-numeric-markers` only when removing markers. It renders to fresh `--render-dir` output, but rendering is not human inspection; inspect page images before visual PASS. For DOCX-only tasks without a converter, omit `--pdf` for structural `PASS WITH LIMITATIONS`.
 
 ## Pitfalls
 
-- Clean text extraction does not prove visual correctness.
-- A font name in DOCX does not prove that the requested face is embedded in PDF.
+- Text extraction and DOCX font names do not prove visual correctness or the requested face's PDF embedding.
 - A URL or citation marker does not prove evidence support.
 - Falling concentration does not by itself prove biodegradation; weathering, dilution, transport, and redistribution may contribute.
-- Do not claim pixel-perfect reference matching unless the reference and rendered output were actually compared.
-- Pagination can differ between DOCX renderers; report the engine used and any required cross-renderer check that was not performed.
+- Do not claim pixel-perfect reference matching without comparing the reference and render. Pagination can differ between DOCX renderers; report the engine and any required cross-renderer check not performed.
 - Do not delete scientific digits when removing bracketed citation markers.
 
-## Bundled references
+## Conditional references
 
-- `references/font-source.md` — source URL, archive hash, verified families, metadata, and redistribution caveat.
-- `references/numeric-citation-marker-removal-and-verification.md` — exact citation-marker scope and probes.
-- `references/thai-essay-layout-notes.md` — historical personal essay preferences; read only when the current request calls for that style.
-- [references/document-structure-and-layout.md](references/document-structure-and-layout.md) — structure by document type, reusable styles, template inspection, and pagination fixes; read for creation or layout changes.
-- [references/government-correspondence-layout.md](references/government-correspondence-layout.md) — OBEC-linked guidance for Thai external letters and body-paragraph rules shared with internal memoranda; read for those correspondence types.
-- [references/internal-government-memo-layout.md](references/internal-government-memo-layout.md) — source-backed layout for the `บันทึกข้อความ` (`แบบที่ ๒๙`) internal-government-memo form; read when that form is requested.
-- Other reference files cover essay style and image/recipe workflows; load them only when the task needs those variants.
+- For a captured essay style, read the applicable `references/thai-essay-layout-notes.md`, `references/essay-layout-session-notes.md`, or `references/essay-style-user-preferences.md`.
+- For player guides, read `references/player-guide-branding-and-unit-validation.md`; for recipe textures, read `references/recipe-texture-validation.md`.
+- Use `references/example-essay.md` only as a sample or validation fixture.

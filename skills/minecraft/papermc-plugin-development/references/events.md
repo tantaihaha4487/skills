@@ -1,6 +1,6 @@
 # Events
 
-Use this reference after locating listener registration, lifecycle ownership, and the target event's Javadocs.
+Use after locating listener registration, lifecycle ownership, and the target event's Javadocs.
 
 ## Use when
 

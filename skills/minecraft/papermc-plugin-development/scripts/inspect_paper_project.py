@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+from paper_descriptor import has_unresolved_placeholders, top_level_yaml
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -27,6 +28,8 @@ IGNORED_DIRS = {
 }
 SOURCE_SUFFIXES = {".java", ".kt", ".kts"}
 DESCRIPTORS = {"plugin.yml", "paper-plugin.yml"}
+TEST_SOURCE_SETS = {"test", "integrationTest", "functionalTest"}
+TEST_SOURCE_KINDS = {"java", "kotlin", "resources"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -36,6 +39,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("root", nargs="?", default=".", help="repository root")
     parser.add_argument(
         "--json", action="store_true", dest="as_json", help="emit JSON"
+    )
+    parser.add_argument(
+        "--evidence-summary",
+        action="store_true",
+        help=(
+            "emit evidence counts and the first three sample paths per category; "
+            "omit this flag to return every path"
+        ),
     )
     return parser.parse_args()
 
@@ -63,7 +74,7 @@ def source_files(root: Path) -> list[Path]:
         if path.is_file()
         and path.suffix in SOURCE_SUFFIXES
         and not is_ignored(path, root)
-        and "src" in path.parts
+        and "src" in path.relative_to(root).parts
     )
 
 
@@ -78,18 +89,21 @@ def rel(path: Path, root: Path) -> str:
     return path.relative_to(root).as_posix()
 
 
-def matching_files(
-    files: list[Path], pattern: str, root: Path, flags: int = 0
-) -> list[str]:
-    regex = re.compile(pattern, flags)
-    return [rel(path, root) for path in files if regex.search(read_text(path))]
+def is_test_source(path: Path, root: Path) -> bool:
+    parts = path.relative_to(root).parts
+    return any(
+        source_root == "src"
+        and source_set in TEST_SOURCE_SETS
+        and source_kind in TEST_SOURCE_KINDS
+        for source_root, source_set, source_kind in zip(parts, parts[1:], parts[2:])
+    )
 
 
-def parse_maven_paper_coordinates(pom: Path) -> list[str]:
+def parse_maven(pom: Path) -> tuple[dict[str, str], list[dict[str, str]]] | None:
     try:
         document = ET.parse(pom).getroot()
     except (ET.ParseError, OSError):
-        return []
+        return None
 
     def local_name(tag: str) -> str:
         return tag.rsplit("}", 1)[-1]
@@ -100,56 +114,49 @@ def parse_maven_paper_coordinates(pom: Path) -> list[str]:
             for child in element:
                 properties[local_name(child.tag)] = (child.text or "").strip()
 
-    coordinates: set[str] = set()
-    for dependency in document.iter():
-        if local_name(dependency.tag) != "dependency":
-            continue
-        values = {
+    dependencies = [
+        {
             local_name(child.tag): (child.text or "").strip()
             for child in dependency
         }
+        for dependency in document.iter()
+        if local_name(dependency.tag) == "dependency"
+    ]
+    return properties, dependencies
+
+
+def resolve_property(value: str, properties: dict[str, str]) -> str:
+    match = re.fullmatch(r"\$\{([^}]+)}", value)
+    return properties.get(match.group(1), value) if match else value
+
+
+def parse_maven_paper_coordinates(pom: Path) -> list[str]:
+    parsed = parse_maven(pom)
+    if parsed is None:
+        return []
+    properties, dependencies = parsed
+    coordinates: set[str] = set()
+    for values in dependencies:
         if values.get("groupId") != "io.papermc.paper" or values.get("artifactId") != "paper-api":
             continue
-        version = values.get("version", "unknown")
-        property_match = re.fullmatch(r"\$\{([^}]+)}", version)
-        if property_match:
-            version = properties.get(property_match.group(1), version)
+        version = resolve_property(values.get("version", "unknown"), properties)
         scope = values.get("scope", "compile")
         coordinates.add(f"io.papermc.paper:paper-api:{version} [{scope}]")
     return sorted(coordinates)
 
 
 def parse_maven_dependencies(pom: Path, root: Path) -> list[str]:
-    try:
-        document = ET.parse(pom).getroot()
-    except (ET.ParseError, OSError):
+    parsed = parse_maven(pom)
+    if parsed is None:
         return []
-
-    def local_name(tag: str) -> str:
-        return tag.rsplit("}", 1)[-1]
-
-    properties: dict[str, str] = {}
-    for element in document.iter():
-        if local_name(element.tag) == "properties":
-            for child in element:
-                properties[local_name(child.tag)] = (child.text or "").strip()
-
+    properties, dependency_values = parsed
     dependencies: set[str] = set()
-    for dependency in document.iter():
-        if local_name(dependency.tag) != "dependency":
-            continue
-        values = {
-            local_name(child.tag): (child.text or "").strip()
-            for child in dependency
-        }
+    for values in dependency_values:
         group = values.get("groupId")
         artifact = values.get("artifactId")
         if not group or not artifact:
             continue
-        version = values.get("version", "managed")
-        property_match = re.fullmatch(r"\$\{([^}]+)}", version)
-        if property_match:
-            version = properties.get(property_match.group(1), version)
+        version = resolve_property(values.get("version", "managed"), properties)
         scope = values.get("scope", "compile")
         optional = ",optional" if values.get("optional", "").lower() == "true" else ""
         dependencies.add(f"{rel(pom, root)}:{scope}{optional}:{group}:{artifact}:{version}")
@@ -216,12 +223,13 @@ def java_version_evidence(build_files: list[Path], root: Path) -> list[str]:
                 if key in {"java.version", "maven.compiler.release", "maven.compiler.source", "maven.compiler.target", "release", "source", "target"} and re.fullmatch(r"\d+", value):
                     evidence.add(f"{label}:{key}={value}")
             continue
-        for match in re.finditer(r"JavaLanguageVersion\.of\s*\(\s*(\d+)\s*\)", text):
-            evidence.add(f"{label}:toolchain={match.group(1)}")
-        for match in re.finditer(r"options\.release\.set\s*\(\s*(\d+)\s*\)", text):
-            evidence.add(f"{label}:release={match.group(1)}")
-        for match in re.finditer(r"(?:sourceCompatibility|targetCompatibility)\s*=\s*(?:JavaVersion\.VERSION_)?(\d+)", text):
-            evidence.add(f"{label}:compatibility={match.group(1)}")
+        for pattern, kind in (
+            (r"JavaLanguageVersion\.of\s*\(\s*(\d+)\s*\)", "toolchain"),
+            (r"options\.release\.set\s*\(\s*(\d+)\s*\)", "release"),
+            (r"(?:sourceCompatibility|targetCompatibility)\s*=\s*(?:JavaVersion\.VERSION_)?(\d+)", "compatibility"),
+        ):
+            for match in re.finditer(pattern, text):
+                evidence.add(f"{label}:{kind}={match.group(1)}")
     return sorted(evidence)
 
 
@@ -234,22 +242,18 @@ def parse_gradle_modules(settings_files: list[Path]) -> list[str]:
     modules: set[str] = set()
     for path in settings_files:
         text = read_text(path)
-        for call in re.findall(r"include\s*\((.*?)\)", text, re.DOTALL):
-            modules.update(re.findall(r"[\"'](:?[^\"']+)[\"']", call))
-        for call in re.findall(r"(?m)^\s*include\s+(.+)$", text):
-            modules.update(re.findall(r"[\"'](:?[^\"']+)[\"']", call))
+        for pattern, flags in (
+            (r"include\s*\((.*?)\)", re.DOTALL),
+            (r"(?m)^\s*include\s+(.+)$", 0),
+        ):
+            for call in re.findall(pattern, text, flags):
+                modules.update(re.findall(r"[\"'](:?[^\"']+)[\"']", call))
     return sorted(modules)
 
 
 def descriptor_summary(path: Path, root: Path) -> dict[str, object]:
     text = read_text(path)
-    keys: dict[str, str] = {}
-    for raw_line in text.splitlines():
-        if not raw_line or raw_line[0].isspace() or raw_line.lstrip().startswith("#"):
-            continue
-        match = re.match(r"^([A-Za-z0-9_-]+):\s*(.*?)\s*$", raw_line)
-        if match:
-            keys[match.group(1)] = match.group(2).strip("'\"")
+    keys = top_level_yaml(text)
     return {
         "path": rel(path, root),
         "kind": path.name,
@@ -258,9 +262,7 @@ def descriptor_summary(path: Path, root: Path) -> dict[str, object]:
         "main": keys.get("main"),
         "api_version": keys.get("api-version"),
         "folia_supported": keys.get("folia-supported"),
-        "has_unresolved_placeholders": bool(
-            re.search(r"\$\{[^}]+}|@[A-Za-z0-9_.-]+@", text)
-        ),
+        "has_unresolved_placeholders": has_unresolved_placeholders(keys),
     }
 
 
@@ -303,15 +305,21 @@ def build_report(root: Path) -> dict[str, object]:
         "minecraft_internals": r"import\s+(?:net\.minecraft|org\.bukkit\.craftbukkit)",
         "reflection": r"java\.lang\.reflect|Class\.forName\s*\(",
     }
-    evidence = {
-        key: matching_files(sources, pattern, root)
-        for key, pattern in evidence_patterns.items()
+    evidence = {key: [] for key in evidence_patterns}
+    compiled_patterns = {
+        key: re.compile(pattern) for key, pattern in evidence_patterns.items()
     }
+    for path in sources:
+        text = read_text(path)
+        relative_path = rel(path, root)
+        for key, regex in compiled_patterns.items():
+            if regex.search(text):
+                evidence[key].append(relative_path)
 
     tests = [
         rel(path, root)
         for path in sources
-        if any(part in {"test", "integrationTest", "functionalTest"} for part in path.parts)
+        if is_test_source(path, root)
     ]
 
     build_systems: list[str] = []
@@ -335,7 +343,7 @@ def build_report(root: Path) -> dict[str, object]:
         warnings.append("Minecraft internals evidence exists; require an API-first justification and per-target tests.")
     if evidence["reflection"]:
         warnings.append("Reflection evidence exists; inspect whether it is compatibility glue and keep it out of hot paths.")
-    if any(d.get("folia_supported") == "true" for d in map(lambda p: descriptor_summary(p, root), descriptors)):
+    if any(descriptor_summary(p, root).get("folia_supported") == "true" for p in descriptors):
         warnings.append("Folia support is declared; compilation is not evidence of region-thread safety.")
 
     return {
@@ -359,6 +367,23 @@ def build_report(root: Path) -> dict[str, object]:
         "tests": tests,
         "ci_workflows": [rel(path, root) for path in ci_files],
         "warnings": warnings,
+    }
+
+
+def summarize_evidence(report: dict[str, object]) -> dict[str, object]:
+    evidence = report["evidence"]
+    if not isinstance(evidence, dict):
+        raise TypeError("report evidence must be a category-to-path mapping")
+    return {
+        **report,
+        "evidence": {
+            key: {
+                "count": len(paths),
+                "sample": paths[:3],
+                "truncated": len(paths) > 3,
+            }
+            for key, paths in evidence.items()
+        },
     }
 
 
@@ -391,7 +416,13 @@ def print_text(report: dict[str, object]) -> None:
     print(f"Source files: {report['source_file_count']}")
     print("Architecture/API evidence:")
     for key, paths in report["evidence"].items():
-        print(f"  - {key}: {', '.join(paths) if paths else 'none found'}")
+        if isinstance(paths, dict):
+            print(
+                f"  - {key}: count={paths['count']} sample={paths['sample']} "
+                f"truncated={str(paths['truncated']).lower()}"
+            )
+        else:
+            print(f"  - {key}: {', '.join(paths) if paths else 'none found'}")
     print(f"Tests: {', '.join(report['tests']) if report['tests'] else 'none found'}")
     print(f"CI: {', '.join(report['ci_workflows']) if report['ci_workflows'] else 'none found'}")
     if report["warnings"]:
@@ -407,6 +438,8 @@ def main() -> int:
         print(f"error: not a directory: {root}", file=sys.stderr)
         return 2
     report = build_report(root)
+    if args.evidence_summary:
+        report = summarize_evidence(report)
     if args.as_json:
         print(json.dumps(report, indent=2, sort_keys=True))
     else:

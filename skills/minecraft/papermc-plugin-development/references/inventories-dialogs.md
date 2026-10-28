@@ -1,6 +1,6 @@
 # Inventories and dialogs
 
-Use this reference after identifying the existing GUI abstraction, ownership rules, and minimum server version.
+Use after identifying the GUI abstraction, ownership rules, and minimum server version.
 
 ## Inventories: prefer
 

@@ -14,7 +14,7 @@
 
 - กระดาษ A4
 - ฟอนต์ไทยที่ระบุในคำขอ เช่น TH SarabunPSK หรือ TH NiramitIT๙
-- เนื้อหา 16 pt และระยะห่างบรรทัด 1.5 ตามโปรไฟล์เริ่มต้น
+- ตัวอย่างนี้ใช้เนื้อหา 16 pt และระยะบรรทัด 1.5
 - ชื่อเรื่องอยู่กึ่งกลางและเป็นตัวหนา
 - เนื้อความจัดชิดขอบทั้งสองด้าน พร้อมย่อบรรทัดแรก
 - ข้อมูลผู้เขียนอยู่ในส่วนท้ายกระดาษเมื่อมีการร้องขอ
@@ -24,7 +24,8 @@
 หลังสร้าง DOCX และ PDF ให้ตรวจอย่างน้อยดังนี้:
 
 ```bash
-python docx_validate.py output.docx
+# Run from the Thai Docs skill root.
+python scripts/verify_thai_docs.py --docx output.docx
 pdfinfo output.pdf | grep -E 'Pages|Page size'
 pdffonts output.pdf
 pdftotext output.pdf output.txt

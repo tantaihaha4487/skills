@@ -1,0 +1,49 @@
+{
+  "baseline_commit": "8e863ebaac6dda4c8ea786daaa58942ef92584b3",
+  "best_validated_round": 87,
+  "python": "3.11.15",
+  "tiktoken": "0.14.0",
+  "encoding": "o200k_base",
+  "surfaces": {
+    "baseline": {
+      "entrypoint_count": 7,
+      "entrypoint_tokens": 13580,
+      "closure_file_count": 61,
+      "closure_tokens": 59382,
+      "all_markdown_count": 70,
+      "all_markdown_tokens": 62337,
+      "all_markdown_bytes": 297941,
+      "usable_files": 161,
+      "resources": 153,
+      "per_entrypoint_tokens": {
+        "skills/productivity/thai-docs/SKILL.md": 3635,
+        "skills/productivity/bw-grid-pdf/SKILL.md": 2115,
+        "skills/minecraft/papermc-plugin-development/SKILL.md": 2729,
+        "skills/minecraft/iris-shader-development/SKILL.md": 1200,
+        "skills/minecraft/fabric-mod-development/SKILL.md": 2050,
+        "skills/design/expressive-motion/SKILL.md": 1137,
+        "skills/deprecated/boxing-me/SKILL.md": 714
+      }
+    },
+    "best": {
+      "entrypoint_count": 7,
+      "entrypoint_tokens": 10891,
+      "closure_file_count": 65,
+      "closure_tokens": 57094,
+      "all_markdown_count": 72,
+      "all_markdown_tokens": 59144,
+      "all_markdown_bytes": 282978,
+      "usable_files": 168,
+      "resources": 160,
+      "per_entrypoint_tokens": {
+        "skills/design/expressive-motion/SKILL.md": 958,
+        "skills/minecraft/fabric-mod-development/SKILL.md": 1658,
+        "skills/minecraft/papermc-plugin-development/SKILL.md": 2381,
+        "skills/minecraft/iris-shader-development/SKILL.md": 885,
+        "skills/productivity/bw-grid-pdf/SKILL.md": 1467,
+        "skills/productivity/thai-docs/SKILL.md": 2840,
+        "skills/deprecated/boxing-me/SKILL.md": 702
+      }
+    }
+  }
+}

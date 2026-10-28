@@ -9,7 +9,7 @@
 
 ## Contents verified
 
-The archive contains the following families and face variants:
+The archive contains these families and face variants:
 
 - TH Sarabun New: regular, bold, italic, bold italic
 - TH SarabunIT๙ / TH SarabunPSK: regular, bold, italic, bold italic
@@ -19,7 +19,7 @@ The archive contains the following families and face variants:
 
 ## Additional local TH SarabunPSK source
 
-A separate local set was found at `/home/mashiro/Downloads/TH Sarabun PSK V-1/` and copied into `assets/fonts/THSarabunPSK/`. The four files were inspected with `fc-scan` and all report the internal family `TH SarabunPSK`.
+A separately sourced local set is in `assets/fonts/THSarabunPSK/`. All four files were inspected with `fc-scan` and report the internal family `TH SarabunPSK`.
 
 SHA-256 values:
 
@@ -40,7 +40,7 @@ SHA-256 values:
 
 Eight byte-identical font copies from the archive's `F0nt/THSarabunIT·/` directory were removed after SHA-256 and byte comparisons. Every distinct font file is retained. The two SarabunPSK-labelled sets are distinct files; select only the intended set for a temporary font environment to avoid family-name collisions.
 
-The font files were inspected with `fc-scan`. The internal family metadata includes:
+`fc-scan` reported these internal family names:
 
 - `TH Sarabun New`
 - `TH SarabunPSK`
@@ -48,8 +48,8 @@ The font files were inspected with `fc-scan`. The internal family metadata inclu
 - `TH Niramit AS`
 - `TH NiramitIT๙`
 
-The archive source page and installation guide were preserved as provenance. Redistribution terms were not independently established from a separate license file, so users should follow the source publisher's terms and not claim a license beyond the source evidence.
+The archive source page and installation guide were preserved as provenance. Redistribution terms were not independently established from a separate license file; follow the source publisher's terms and do not claim a license beyond the source evidence.
 
 ## Use policy
 
-Select the family that matches the requested institutional template or reference document. Do not silently substitute a different family. Verify the embedded face in the exported PDF with `pdffonts`.
+Select the family matching the requested institutional template or reference document. Never silently substitute a different family. Verify the exported PDF's embedded face with `pdffonts`.

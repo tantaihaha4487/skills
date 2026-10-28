@@ -3,35 +3,35 @@
 <!--
   B/W grid cram sheet template.
   Copy this file, then:
-    1. Set the @page size for your target paper (default: A4 landscape).
-    2. Set the font-family in body{} to match your script (Latin/Thai/etc).
-    3. Duplicate <div class="page">...</div> per page.
-    4. Duplicate <div class="row">...</div> for a 2-row page, or just use
-       one .row per page for a simpler 1-row layout.
-    5. Duplicate <div class="col">...</div> for each grid cell (3 or 4 per
-       row is typical; see SKILL.md "Choosing the grid").
-    6. Fill each .col with .block-title + .body-text pairs, optional
-       .trap-box callouts, and/or a <table> — reuse these classes as-is.
-  Render with weasyprint. See SKILL.md for the full pipeline.
+    1. Set @page size for target paper (default: A4 landscape).
+    2. Set body{} font-family for the script (Latin/Thai/etc).
+    3. Duplicate .page per printed page.
+    4. Duplicate .row per grid row (one or two rows typical).
+    5. Duplicate .col per grid cell (3 or 4 per row typical; see SKILL.md "Choosing the grid").
+    6. Fill .col with .block-title + .body-text pairs, optional .trap-box
+       callouts, and/or a <table>; reuse these classes as-is.
+  Render with WeasyPrint; see SKILL.md for the full pipeline.
 -->
 <head>
 <meta charset="UTF-8">
 <style>
   @page {
-    size: 297mm 210mm;        /* A4 landscape. Use 279mm 216mm for US Letter landscape. */
+    size: 297mm 210mm;        /* A4 landscape; use 279mm 216mm for US Letter landscape. */
     margin: 10mm 12mm;
   }
   * { box-sizing: border-box; }
+  a, .header .meta, .body-text, .footer-note { color: #000; }
+  .header .meta, .body-text, .trap-box .tbody, td, ul.chk, .footer-note { font-weight: 300; }
+  .header .title, .block-title, .trap-box .tlabel, th, .keyword { font-weight: 700; }
   body {
     font-family: 'Noto Sans Thai', 'Noto Sans', sans-serif; /* swap for your script */
     font-weight: 300;
-    color: #000000;
+    color: #000;
     margin: 0;
     font-size: 10px;
   }
 
-  /* One .page per printed page. Omit page-break-after on the last one,
-     or just don't add it if there's only one page. */
+  /* One .page per printed page; omit page-break-after on the last or only one. */
   .page {
     page-break-after: always;
     display: flex;
@@ -49,10 +49,10 @@
     align-items: baseline;
     flex-shrink: 0;
   }
-  .header .title { font-weight: 700; font-size: 17px; }
-  .header .meta  { font-weight: 300; font-size: 9px; color: #444; }
+  .header .title { font-size: 17px; }
+  .header .meta  { font-size: 9px; }
 
-  /* Stack .row elements for a multi-row page (e.g. 2 rows x 4 cols = 8 cells). */
+  /* Stack .row elements for multi-row pages (e.g. 2 rows x 4 cols = 8 cells). */
   .grid { flex: 1; display: flex; flex-direction: column; min-height: 0; }
   .row {
     flex: 1;
@@ -60,7 +60,7 @@
     grid-template-columns: repeat(4, 1fr);  /* change column count here */
     min-height: 0;
   }
-  .row.top { border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 6px; }
+  .row:not(:last-child), .row.top { border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 6px; }
 
   .col {
     padding: 0 10px;
@@ -74,17 +74,14 @@
   .col:last-child  { padding-right: 0; }
 
   .block-title {
-    font-weight: 700;
     font-size: 11px;
     border-bottom: 1px solid #000;
     padding-bottom: 2px;
     margin-bottom: 3px;
   }
   .body-text {
-    font-weight: 300;
     font-size: 9.5px;
     line-height: 1.45;
-    color: #111;
   }
 
   /* Bordered callout box for warnings / gotchas / "don't confuse this with X". */
@@ -94,26 +91,24 @@
     font-size: 8.5px;
     line-height: 1.35;
   }
-  .trap-box .tlabel { font-weight: 700; margin-bottom: 1px; }
-  .trap-box .tbody  { font-weight: 300; }
+  .trap-box .tlabel { margin-bottom: 1px; }
 
   table { width: 100%; border-collapse: collapse; font-size: 8.5px; }
   th {
-    font-weight: 700;
     text-align: left;
     padding: 2px 2px;
     border-bottom: 1.5px solid #000;   /* thicker than data-row dividers */
   }
   th.r, td.r { text-align: right; }
-  td { font-weight: 300; padding: 2px 2px; border-bottom: 0.5px solid #999; }
+  td { padding: 2px 2px; border-bottom: 0.5px solid #000; vertical-align: top; }
 
   /* Checklist-style list: use for "must know" / review items. */
-  ul.chk { list-style: none; margin: 0; padding: 0; font-size: 9px; font-weight: 300; line-height: 1.55; }
+  ul.chk { list-style: none; margin: 0; padding: 0; font-size: 9px; line-height: 1.55; }
   ul.chk li:before { content: "\2610  "; }   /* empty checkbox glyph */
 
-  .footer-note { margin-top: auto; text-align: right; font-size: 7.5px; color: #555; font-weight: 300; }
+  .footer-note { margin-top: auto; text-align: right; font-size: 7.5px; }
 
-  .keyword { font-weight: 700; }   /* inline emphasis inside .body-text — bold, never color */
+  /* .keyword: inline emphasis inside .body-text — bold, never color. */
 </style>
 </head>
 <body>

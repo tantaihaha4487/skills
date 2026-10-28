@@ -1,6 +1,6 @@
 # Versions, Deprecations, and Migrations
 
-Use this reference for every Minecraft, Java, mapping, Loom, Loader, or Fabric API upgrade and whenever an example's names differ from the project.
+Use for every Minecraft/Java/mapping/Loom/Loader/Fabric API upgrade or example/project name mismatch.
 
 ## Source Resolution Order
 
@@ -10,7 +10,7 @@ Use this reference for every Minecraft, Java, mapping, Loom, Loader, or Fabric A
 4. Official migration guide, release announcement, changelog, and repository history.
 5. Existing repository conventions after confirming they remain valid.
 
-Current docs may default to a newer Minecraft release. Use the documentation version selector and check the version banner on every copied signature. Documentation examples can also be rendered in a different mapping namespace; identify the project's namespace before translating names.
+Current docs may default to newer Minecraft versions; use the version selector and check copied signatures' version banners. Examples may use another mapping namespace; identify the project's namespace before translating names.
 
 ## API Status Workflow
 
@@ -55,11 +55,11 @@ Minecraft 1.21.11 is the final obfuscated release supported by the traditional Y
 | Production task | Remapping, commonly `remapJar` | Normal `jar` |
 | Class-tweaker namespace | Commonly `named` | `official` |
 
-Recommended path: first migrate the 1.21.11 project from Yarn to Mojang names while still on 1.21.11, validate, then port to 26.1 using the official guide. All code interacting with Minecraft must be recompiled; an older binary is not forward-compatible merely because source names look similar.
+First migrate the 1.21.11 project from Yarn to Mojang names while on 1.21.11, validate, then port to 26.1 using the official guide. All code interacting with Minecraft must be recompiled; similar source names do not make an older binary forward-compatible.
 
 ## Selected 1.21.11 Review Areas
 
-Official 1.21.11 notes call out changes including game-rule registration, renewed World Render Events, larger custom-payload support, and recipe synchronization. Use the release notes as a routing index, then inspect the exact API source/Javadocs for the feature being ported.
+Official 1.21.11 notes call out game-rule registration, renewed World Render Events, larger custom-payload support, and recipe synchronization. Use the release notes as a routing index, then inspect the exact API source/Javadocs for the feature being ported.
 
 ## Official Sources
 

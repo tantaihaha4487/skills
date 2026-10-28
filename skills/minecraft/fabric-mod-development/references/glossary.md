@@ -1,6 +1,6 @@
 # Fabric Terminology
 
-Load this reference only when terminology in a repository or migration is ambiguous.
+Load only when repository or migration terminology is ambiguous.
 
 - **Access widener:** Older Fabric mechanism for widening access or mutability of vanilla members. Supported by older Loader/Loom stacks and generalized by class tweakers in newer stacks.
 - **Class tweaker:** Loader 0.18+ transform description that can widen access and inject interfaces; configured through historically named access-widener manifest/Gradle fields.

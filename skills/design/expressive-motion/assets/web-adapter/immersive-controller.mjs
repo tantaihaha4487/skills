@@ -1,10 +1,12 @@
+import {hash32} from './hash.mjs';
+import {SOURCE_REVEAL_SHAPES} from './reveal-shapes.mjs';
+import {clamp,mix} from './math.mjs';
+
 // Browser implementation of the reference shell's immersive reveal lifecycle.  The
 // values are kept as live state instead of replacing a CSS animation on each
 // toggle, so opening while closing (and the reverse) starts at the current
 // reveal and rotation rather than jumping to an endpoint.
 
-const clamp = (value, low = 0, high = 1) => Math.max(low, Math.min(high, value));
-const mix = (a, b, t) => a + (b - a) * t;
 const outCubic = (t) => 1 - (1 - t) ** 3;
 const outBack = (t, overshoot = 2.4) => 1 + (overshoot + 1) * (t - 1) ** 3 + overshoot * (t - 1) ** 2;
 const inBack = (t, overshoot = 1.2) => (overshoot + 1) * t ** 3 - overshoot * t ** 2;
@@ -14,20 +16,16 @@ const inBack = (t, overshoot = 1.2) => (overshoot + 1) * t ** 3 - overshoot * t 
 // polygon multiplier.  The browser fixture samples the same analytic polar boundary;
 // the reach calculation follows the source equation so
 // valley-heavy shapes clear the same corners at the same scalar progress.
+const {cookie9, cookie6, ...otherRevealShapes} = SOURCE_REVEAL_SHAPES;
+const cloneRevealShape = shape => shape.slice();
+const clonedOtherRevealShapes = Object.fromEntries(
+  Object.entries(otherRevealShapes).map(([name, shape]) => [name, cloneRevealShape(shape)]),
+);
 export const REVEAL_SHAPE_PARAMS = Object.freeze({
   circle: [0, 0, 1, 0],
-  cookie6: [6, 0.1, 1, 0],
-  cookie9: [9, 0.09, 1, 0],
-  clover4: [4, 0.42, 0.55, 0],
-  clover8: [8, 0.28, 0.6, 0],
-  sunny: [8, 0.14, 2.2, 0],
-  verySunny: [8, 0.26, 2.6, 0],
-  softBurst: [10, 0.16, 1.5, 0],
-  burst: [12, 0.24, 2.8, 0],
-  flower: [8, 0.32, 0.45, 0],
-  puffy: [6, 0.18, 0.5, 0],
-  pentagon: [5, 0.12, 3, 0],
-  gem: [6, 0.08, 4, 0],
+  cookie6: cloneRevealShape(cookie6),
+  cookie9: cloneRevealShape(cookie9),
+  ...clonedOtherRevealShapes,
 });
 
 /**
@@ -96,12 +94,6 @@ export function revealMaskReach(reach, width, height, shapeName = 'cookie9') {
   return Math.max(0, reach) * Math.hypot(width, height) / 2 / divisor + 2;
 }
 
-function hash32(text) {
-  let value = 2166136261;
-  for (const byte of new TextEncoder().encode(String(text ?? ''))) value = Math.imul(value ^ byte, 16777619) >>> 0;
-  return value >>> 0;
-}
-
 // Default reveal seed; a number is used as the hash directly.
 export const DEFAULT_REVEAL_SEED = 867747986;
 
@@ -149,9 +141,20 @@ export class ImmersiveController {
 
   setOpen(open, { policy = 'shape', key = DEFAULT_REVEAL_SEED, noShapes = false } = {}) {
     if (this.disposed) return;
-    this.targetOpen = Boolean(open);
+    const requestedOpen = Boolean(open);
+    const requestedNoShapes = Boolean(noShapes);
+    if (
+      requestedOpen &&
+      this.targetOpen &&
+      this.frame === null &&
+      this.reveal >= 1 &&
+      this.reach >= 1 &&
+      this.mode === policy &&
+      this.noShapes === requestedNoShapes
+    ) return;
+    this.targetOpen = requestedOpen;
     this.mode = policy;
-    this.noShapes = Boolean(noShapes);
+    this.noShapes = requestedNoShapes;
     this.cancelFrame();
     this.startReveal = this.reveal;
     this.startReach = this.reach;

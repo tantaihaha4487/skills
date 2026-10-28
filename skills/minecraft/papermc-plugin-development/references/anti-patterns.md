@@ -2,7 +2,7 @@
 
 ## Load this reference when
 
-Load this file during planning and review to detect a wrong direction. Follow the linked governing reference for the actual decision and validation rules; do not use this file as a substitute.
+Load during planning and review to detect a wrong direction. Follow the linked governing reference for the actual decision and validation rules; do not use this file as a substitute.
 
 ## Stop and reroute
 
